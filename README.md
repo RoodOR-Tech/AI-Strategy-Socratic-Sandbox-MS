@@ -8,10 +8,27 @@ Two copies of the same app ship in this repo:
 
 | File | Purpose |
 |---|---|
-| `index.html` | Canonical source. Use for Vercel or any static web host. |
+| `index.html` | Canonical source. Served on GitHub Pages and usable on any static web host. |
 | `ai-strategy-socratic-sandbox.aspx` | Byte-identical copy for SharePoint document libraries, which render `.aspx` in the browser but force `.html` files to download or open in a preview pane. |
 
 **If you edit `index.html`, regenerate the copy:** `cp index.html ai-strategy-socratic-sandbox.aspx`
+
+## Live app — GitHub Pages
+
+The app is published at:
+
+**<https://roodor-tech.github.io/AI-Strategy-Socratic-Sandbox-MS/>**
+
+Deployment is automated by `.github/workflows/deploy-pages.yml`: every push to `main`
+republishes the site (only `index.html` and the `.aspx` copy are deployed). No build step.
+
+If the first workflow run fails with a "Pages site not found / not enabled" error, a repo
+admin needs to enable it once: **Settings → Pages → Build and deployment → Source →
+GitHub Actions**, then re-run the workflow.
+
+> Note: workshop notes are stored in the visitor's own browser (local storage, keyed per
+> page URL). Nothing is ever sent to the server, so the public URL carries no data risk —
+> but notes do not roam between devices or browsers.
 
 ## Deploy to SharePoint
 
@@ -34,8 +51,10 @@ Options, in order of preference:
    to a library on that site:
    `Set-SPOSite -Identity https://tenant.sharepoint.com/sites/workshops -DenyAddAndCustomizePages $false`
    Scope this to a single, controlled site — do not enable it tenant-wide.
-2. **Host `index.html` on an approved static host** (Vercel, Azure Static Web Apps) and
-   link to it from SharePoint, or surface it in a page with the Embed web part.
+2. **Link to the GitHub Pages site** (see above) from SharePoint, or surface it in a
+   modern page with the **Embed** web part (a site admin must add
+   `roodor-tech.github.io` to the site's allowed iframe domains under
+   Site Settings → HTML Field Security).
 3. If neither is possible, users can still download the `.html` file and open it locally —
    the app is fully self-contained.
 
@@ -51,12 +70,6 @@ Options, in order of preference:
 - Clipboard and file download have graceful fallbacks with clear user messaging for
   locked-down browsers and embedded webviews; if local storage is unavailable, the app
   says so and keeps working for the session.
-
-## Deploy on Vercel
-
-1. In Vercel, choose **Add New Project**.
-2. Import this GitHub repository.
-3. Use the default static-site settings. No build command is required.
 
 ## Accessibility (WCAG 2.1 Level AA)
 
