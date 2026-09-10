@@ -155,7 +155,7 @@ body.focus-mode .workspace{box-shadow:var(--shadow2)}
     <button class="btn ghost" id="nextTopBtn" type="button">Next phase</button>
     <button class="btn secondary" id="focusBtn" type="button">Focus Mode</button>
     <button class="btn secondary" id="resetBtn" type="button">Reset</button>
-    <button class="btn" id="exportTopBtn" type="button">Export Draft</button>
+    <button class="btn" id="exportTopBtn" type="button">Export Word</button>
   </div>
 </header>
 
@@ -239,8 +239,7 @@ body.focus-mode .workspace{box-shadow:var(--shadow2)}
   </div>
   <div class="draft-scroll" id="draftScroll" role="region" aria-label="Captured draft sections" tabindex="0"></div>
   <div class="draft-actions">
-    <button class="btn" id="exportBtn" type="button">Export Markdown</button>
-    <button class="btn secondary" id="exportWordBtn" type="button">Export Word</button>
+    <button class="btn" id="exportWordBtn" type="button">Export Word</button>
     <button class="btn secondary" id="copyDraftBtn" type="button">Copy Draft</button>
   </div>
 </aside>
@@ -282,7 +281,7 @@ var current=1,timerSeconds=480,timerHandle=null,storageOk=true;
 
 function $(id){return document.getElementById(id)}
 var els={};
-['phaseTabs','phasePanel','phaseKicker','phaseTitle','phaseCopy','phasePill','phaseProgressLabel','saveStatus','progressBar','sideProgressBar','timerBtn','timerReadout','huddleHint','discussionQuestion','contextLabelText','contextInput','contextHint','mediaGrid','promptText','notesInput','consensusInput','starterChips','progressText','draftScroll','toast','resetDialog','copyPromptBtn','copyDraftBtn','exportBtn','exportWordBtn','exportTopBtn','nextBtn','nextTopBtn','prevBtn','prevTopBtn','focusBtn','resetBtn'].forEach(function(id){els[id]=$(id)});
+['phaseTabs','phasePanel','phaseKicker','phaseTitle','phaseCopy','phasePill','phaseProgressLabel','saveStatus','progressBar','sideProgressBar','timerBtn','timerReadout','huddleHint','discussionQuestion','contextLabelText','contextInput','contextHint','mediaGrid','promptText','notesInput','consensusInput','starterChips','progressText','draftScroll','toast','resetDialog','copyPromptBtn','copyDraftBtn','exportWordBtn','exportTopBtn','nextBtn','nextTopBtn','prevBtn','prevTopBtn','focusBtn','resetBtn'].forEach(function(id){els[id]=$(id)});
 
 var reducedMotion=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -435,27 +434,11 @@ function stopTimer(announce){
 }
 
 /* --- Export / clipboard --- */
-function markdown(){
-  return ['# Agency AI Adoption Strategy Workshop Capture','','_Drafted from Socratic Sandbox consensus notes._','']
+function plainText(){
+  return ['Agency AI Adoption Strategy Workshop Capture','','Drafted from Socratic Sandbox consensus notes.','']
     .concat(phases.reduce(function(a,p){
-      return a.concat(['## '+p.id+'. '+p.title,'',state[p.id].consensus.trim()||'_Awaiting group consensus._','']);
+      return a.concat([p.id+'. '+p.title,'',state[p.id].consensus.trim()||'Awaiting group consensus.','']);
     },[])).join('\n');
-}
-function exportMarkdown(){
-  try{
-    var blob=new Blob([markdown()],{type:'text/markdown;charset=utf-8'});
-    var url=URL.createObjectURL(blob);
-    var a=document.createElement('a');
-    a.href=url;
-    a.download='agency-ai-strategy-workshop-capture.md';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(function(){URL.revokeObjectURL(url)},2000);
-    showToast('Draft exported as Markdown file');
-  }catch(e){
-    showToast('Download blocked here — use Copy Draft instead');
-  }
 }
 function draftHtml(){
   var body=phases.map(function(p){
@@ -582,10 +565,9 @@ els.consensusInput.addEventListener('input',function(e){
   save();
 });
 els.copyPromptBtn.addEventListener('click',function(e){copyText(els.promptText.textContent,e.currentTarget,'Copy Prompt')});
-els.copyDraftBtn.addEventListener('click',function(e){copyRichText(draftHtml(),markdown(),e.currentTarget,'Copy Draft')});
-els.exportBtn.addEventListener('click',exportMarkdown);
+els.copyDraftBtn.addEventListener('click',function(e){copyRichText(draftHtml(),plainText(),e.currentTarget,'Copy Draft')});
 els.exportWordBtn.addEventListener('click',exportWord);
-els.exportTopBtn.addEventListener('click',exportMarkdown);
+els.exportTopBtn.addEventListener('click',exportWord);
 els.nextBtn.addEventListener('click',nextPhase);
 els.nextTopBtn.addEventListener('click',nextPhase);
 els.prevBtn.addEventListener('click',prevPhase);
