@@ -240,6 +240,7 @@ body.focus-mode .workspace{box-shadow:var(--shadow2)}
   <div class="draft-scroll" id="draftScroll" role="region" aria-label="Captured draft sections" tabindex="0"></div>
   <div class="draft-actions">
     <button class="btn" id="exportBtn" type="button">Export Markdown</button>
+    <button class="btn secondary" id="exportWordBtn" type="button">Export Word</button>
     <button class="btn secondary" id="copyDraftBtn" type="button">Copy Draft</button>
   </div>
 </aside>
@@ -281,7 +282,7 @@ var current=1,timerSeconds=480,timerHandle=null,storageOk=true;
 
 function $(id){return document.getElementById(id)}
 var els={};
-['phaseTabs','phasePanel','phaseKicker','phaseTitle','phaseCopy','phasePill','phaseProgressLabel','saveStatus','progressBar','sideProgressBar','timerBtn','timerReadout','huddleHint','discussionQuestion','contextLabelText','contextInput','contextHint','mediaGrid','promptText','notesInput','consensusInput','starterChips','progressText','draftScroll','toast','resetDialog','copyPromptBtn','copyDraftBtn','exportBtn','exportTopBtn','nextBtn','nextTopBtn','prevBtn','prevTopBtn','focusBtn','resetBtn'].forEach(function(id){els[id]=$(id)});
+['phaseTabs','phasePanel','phaseKicker','phaseTitle','phaseCopy','phasePill','phaseProgressLabel','saveStatus','progressBar','sideProgressBar','timerBtn','timerReadout','huddleHint','discussionQuestion','contextLabelText','contextInput','contextHint','mediaGrid','promptText','notesInput','consensusInput','starterChips','progressText','draftScroll','toast','resetDialog','copyPromptBtn','copyDraftBtn','exportBtn','exportWordBtn','exportTopBtn','nextBtn','nextTopBtn','prevBtn','prevTopBtn','focusBtn','resetBtn'].forEach(function(id){els[id]=$(id)});
 
 var reducedMotion=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -463,6 +464,33 @@ function draftHtml(){
   }).join('');
   return '<h1>Agency AI Adoption Strategy Workshop Capture</h1><p><em>Drafted from Socratic Sandbox consensus notes.</em></p>'+body;
 }
+function wordDocument(){
+  return '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'
+    +'<head><meta charset="utf-8"><title>Agency AI Adoption Strategy Workshop Capture</title>'
+    +'<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->'
+    +'<style>'
+    +'body{font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#182330}'
+    +'h1{font-size:20pt;color:#102b48}'
+    +'h2{font-size:14pt;color:#17375f;margin-top:18pt}'
+    +'p{line-height:1.4}'
+    +'</style></head><body>'+draftHtml()+'</body></html>';
+}
+function exportWord(){
+  try{
+    var blob=new Blob([wordDocument()],{type:'application/msword'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url;
+    a.download='agency-ai-strategy-workshop-capture.doc';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function(){URL.revokeObjectURL(url)},2000);
+    showToast('Draft exported as Word document');
+  }catch(e){
+    showToast('Download blocked here — use Copy Draft instead');
+  }
+}
 function legacyCopy(text){
   var ta=document.createElement('textarea');
   ta.value=text;
@@ -556,6 +584,7 @@ els.consensusInput.addEventListener('input',function(e){
 els.copyPromptBtn.addEventListener('click',function(e){copyText(els.promptText.textContent,e.currentTarget,'Copy Prompt')});
 els.copyDraftBtn.addEventListener('click',function(e){copyRichText(draftHtml(),markdown(),e.currentTarget,'Copy Draft')});
 els.exportBtn.addEventListener('click',exportMarkdown);
+els.exportWordBtn.addEventListener('click',exportWord);
 els.exportTopBtn.addEventListener('click',exportMarkdown);
 els.nextBtn.addEventListener('click',nextPhase);
 els.nextTopBtn.addEventListener('click',nextPhase);
