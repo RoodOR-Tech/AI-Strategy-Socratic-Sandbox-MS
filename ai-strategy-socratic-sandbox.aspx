@@ -456,6 +456,13 @@ function exportMarkdown(){
     showToast('Download blocked here — use Copy Draft instead');
   }
 }
+function draftHtml(){
+  var body=phases.map(function(p){
+    var c=state[p.id].consensus.trim();
+    return '<h2>'+p.id+'. '+esc(p.title)+'</h2><p>'+(c?esc(c).replace(/\n/g,'<br>'):'<em>Awaiting group consensus.</em>')+'</p>';
+  }).join('');
+  return '<h1>Agency AI Adoption Strategy Workshop Capture</h1><p><em>Drafted from Socratic Sandbox consensus notes.</em></p>'+body;
+}
 function legacyCopy(text){
   var ta=document.createElement('textarea');
   ta.value=text;
@@ -483,6 +490,25 @@ function copyText(text,btn,label){
     navigator.clipboard.writeText(text).then(function(){done(true)},function(){done(legacyCopy(text))});
   }else{
     done(legacyCopy(text));
+  }
+}
+function copyRichText(html,text,btn,label){
+  function fallback(){copyText(text,btn,label)}
+  if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){
+    var item;
+    try{
+      item=new ClipboardItem({
+        'text/html':new Blob([html],{type:'text/html'}),
+        'text/plain':new Blob([text],{type:'text/plain'})
+      });
+    }catch(e){fallback();return}
+    navigator.clipboard.write([item]).then(function(){
+      setText(btn,'Copied');
+      showToast('Copied formatted draft to clipboard');
+      setTimeout(function(){setText(btn,label)},1100);
+    },fallback);
+  }else{
+    fallback();
   }
 }
 
@@ -528,7 +554,7 @@ els.consensusInput.addEventListener('input',function(e){
   save();
 });
 els.copyPromptBtn.addEventListener('click',function(e){copyText(els.promptText.textContent,e.currentTarget,'Copy Prompt')});
-els.copyDraftBtn.addEventListener('click',function(e){copyText(markdown(),e.currentTarget,'Copy Draft')});
+els.copyDraftBtn.addEventListener('click',function(e){copyRichText(draftHtml(),markdown(),e.currentTarget,'Copy Draft')});
 els.exportBtn.addEventListener('click',exportMarkdown);
 els.exportTopBtn.addEventListener('click',exportMarkdown);
 els.nextBtn.addEventListener('click',nextPhase);
