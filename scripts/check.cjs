@@ -1,8 +1,10 @@
 const fs=require('node:fs'),assert=require('node:assert/strict'),crypto=require('node:crypto'),vm=require('node:vm');
 const html=fs.readFileSync('index.html','utf8');assert.equal(html,fs.readFileSync('ai-strategy-socratic-sandbox.aspx','utf8'),'SharePoint copy differs');
-for(const match of html.matchAll(/(?:src|href)="((?:assets|templates)\/[^"#]+)"/g))assert.ok(fs.existsSync(match[1]),'Missing '+match[1]);
-for(const dir of ['assets','templates'])for(const file of fs.readdirSync(dir))if(file.endsWith('.js'))new vm.Script(fs.readFileSync(dir+'/'+file,'utf8'),{filename:file});
-const hash=crypto.createHash('sha256').update(fs.readFileSync('assets/vendor/docx-9.6.1.iife.js')).digest('hex');
-assert.equal(hash,'ecef72931c98461fc327aa6e95867820aced5db4c3d971ac5ad38ccda21dd360');
-for(const file of ['assets/app.js','assets/state.js','assets/strategy-content.js','assets/docx-export.js'])assert.ok(!/\b(?:fetch\s*\(|XMLHttpRequest\b|sendBeacon\b|WebSocket\b)/.test(fs.readFileSync(file,'utf8')),'Unexpected network code: '+file);
-console.log('Syntax, asset references, SharePoint parity, dependency checksum and no-network source checks passed.');
+assert.equal(html,require('./package-single-file.cjs').render(),'Repackage changed source with npm run package');
+assert.ok(!/<script\b[^>]*\bsrc\s*=/i.test(html),'External script dependency');assert.ok(!/<link\b[^>]*rel="stylesheet"/i.test(html),'External stylesheet dependency');
+for(const match of html.matchAll(/<(?:img|link)\b[^>]*(?:src|href)="([^"]+)"/gi))assert.ok(match[1].startsWith('data:'),'Nonembedded asset '+match[1]);
+for(const match of html.matchAll(/<script>\n([\s\S]*?)<\/script>/g))new vm.Script(match[1]);
+assert.ok(html.includes('data:font/ttf;base64,'));assert.ok(!html.includes('@@LOGO@@'));assert.ok(!html.includes('<!-- INLINE_'));
+const hash=crypto.createHash('sha256').update(fs.readFileSync('assets/vendor/docx-9.6.1.iife.js')).digest('hex');assert.equal(hash,'ecef72931c98461fc327aa6e95867820aced5db4c3d971ac5ad38ccda21dd360');
+for(const file of ['assets/app.js','assets/workshop-state.js','assets/report-content.js','assets/docx-export.js'])assert.ok(!/\b(?:fetch\s*\(|XMLHttpRequest\b|sendBeacon\b|WebSocket\b)/.test(fs.readFileSync(file,'utf8')),'Unexpected network code: '+file);
+console.log('Standalone packaging, embedded fonts/logo/scripts, syntax, HTML/ASPX parity and vendor checksum passed.');

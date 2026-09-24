@@ -19,21 +19,8 @@
     content.push(para('Generated '+date+' · Socratic Sandbox '+t.version,{spacing:{before:360,after:120},run:{size:18,color:'525B62'}}));
     model.sections.forEach(function(s,i){
       content.push(heading(s.id+'. '+s.title,d.HeadingLevel.HEADING_1,{pageBreakBefore:i===0,keepNext:s.fields.length>0}));
-      s.fields.forEach(function(f){content.push(heading(f.label,d.HeadingLevel.HEADING_2));content.push.apply(content,blocks(f.blocks))});
+      s.fields.forEach(function(f){if(f.label)content.push(heading(f.label,d.HeadingLevel.HEADING_2));content.push.apply(content,blocks(f.blocks))});
     });
-    if(model.priorities.length){
-      content.push(heading(t.roadmapTitle,d.HeadingLevel.HEADING_1));
-      model.priorities.forEach(function(p,i){
-        content.push(heading(p.priority.trim()||'Priority '+(i+1),d.HeadingLevel.HEADING_2));
-        var labels={action:'Immediate next action',owner:'Accountable owner',dependency:'Major dependency',timeframe:'Target timeframe',risks:'Unresolved decisions / risks'};
-        Object.keys(labels).forEach(function(k){if(p[k].trim()){
-          var lines=p[k].replace(/\r\n?/g,'\n').split('\n').filter(function(s){return s.trim()}).map(function(s){return {bullet:/^\s*[-*•]\s+/.test(s),text:s.replace(/^\s*[-*•]\s+/,'').trim()}});
-          if(!lines[0].bullet){content.push(new d.Paragraph({children:[new d.TextRun({text:labels[k]+': ',bold:true}),new d.TextRun(clean(lines.shift().text))],spacing:{after:100}}));}
-          else content.push(para(labels[k],{keepNext:true,spacing:{before:100,after:60},run:{bold:true}}));
-          content.push.apply(content,blocks(lines));
-        }});
-      });
-    }
     return new d.Document({
       creator:clean(model.metadata.agency.trim())||'Agency workshop',title:clean(title),description:'Agency AI Adoption Strategy',
       styles:{default:{document:{run:{font:t.font,size:t.bodySize,color:t.bodyColor},paragraph:{spacing:{after:t.paragraphAfter,line:t.line},widowControl:true}},title:{run:{font:t.headingFont,size:t.titleSize,color:'000000'},paragraph:{keepNext:true}},heading1:{run:{font:t.headingFont,size:t.heading1Size,color:t.headingColor},paragraph:{spacing:{before:280,after:160},keepNext:true}},heading2:{run:{font:t.headingFont,size:t.heading2Size,color:t.headingColor},paragraph:{spacing:{before:180,after:100},keepNext:true}}}},

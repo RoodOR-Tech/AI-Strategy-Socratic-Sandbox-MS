@@ -12,17 +12,4 @@ var phases=[['Summary','Executive Summary','The Stress-Test Interview','Stress-t
 
 // Shared guardrails preserve the exercise while preventing unsupported agency claims.
 phases.forEach(function(p){var exercise=p.prompt;p.prompt=function(c){return exercise(c)+'\n\nAct as a Socratic challenger, not the agency decision-maker. Distinguish facts from assumptions. Do not pretend to know agency-specific facts not supplied. Identify tradeoffs and missing information; challenge weak reasoning with three difficult questions. Cite only sources you can verify and flag anything requiring human verification. The group will make all final decisions.'}});
-var captureLabels=[
- ['Mission / problem','Strategic rationale','Intended public value','Key boundaries'],
- ['Principles','Meaning in practice','Practical decision rules'],
- ['Strategic governance model','Operational governance model','Escalation criteria','Accountability'],
- ['Intake path','Risk evaluation approach','Approval / escalation rules','Required safeguards'],
- ['Data boundaries','Classification requirements','Restricted data','Stewardship / approval authority'],
- ['Approved-tool approach','New-tool evaluation process','Prohibited / unmanaged uses','Workforce need'],
- ['Required audiences','Training expectations','Role-specific requirements','Ongoing engagement / support'],
- ['Human review requirements','Verification expectations','Sign-off authority','Uses that may not be autonomous'],
- ['Disclosure triggers','Internal transparency','Public transparency','Feedback / contact mechanism'],
- ['Outcome / value measures','Efficiency measures','Risk / compliance measures','Review cadence']
-];
-phases.forEach(function(p,i){p.fields=captureLabels[i].map(function(label,n){return {key:'field'+n,label:label}})});
 if(typeof module==='object'&&module.exports)module.exports=phases;

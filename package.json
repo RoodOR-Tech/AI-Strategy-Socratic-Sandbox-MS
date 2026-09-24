@@ -1,9 +1,10 @@
 {
   "name": "ai-strategy-socratic-sandbox",
-  "version": "2.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Static local-only workshop; npm dependencies are development tests only",
   "scripts": {
+    "package": "node scripts/package-single-file.cjs",
     "test": "node --test tests/*.test.cjs",
     "test:browser": "node tests/browser.cjs",
     "check": "node scripts/check.cjs"
