@@ -3,6 +3,7 @@
 
 var STORAGE_KEY='ai-strategy-socratic-sandbox-v2:'+location.pathname;
 var APP_NAME='AI Strategy Socratic Sandbox';
+var currentView='setup';
 var current=1,timerSeconds=480,timerHandle=null,storageOk=true;
 
 function $(id){return document.getElementById(id)}
@@ -63,7 +64,7 @@ function updateTabs(){
     t.tabIndex=selected?0:-1;
     t.dataset.captured=captured;
     var p=phases[id-1];
-    t.setAttribute('aria-label','Phase '+p.id+': '+p.short+(captured?', captured':', not captured'));
+    t.setAttribute('aria-label','Phase '+p.id+': '+p.short+(captured?', approved':', not approved'));
   });
 }
 
@@ -105,6 +106,7 @@ function renderDraft(){
 
 function setPhase(id,opts){
   opts=opts||{};
+  showView('phase',false);
   current=Math.min(phases.length,Math.max(1,id));
   stopTimer(false);
   timerSeconds=480;
@@ -112,10 +114,11 @@ function setPhase(id,opts){
   render();
   window.scrollTo({top:0,behavior:reducedMotion&&reducedMotion.matches?'auto':'smooth'});
   if(opts.focusTab){$('tab-'+current).focus()}
+  else if(!opts.focusHeading){els.phaseTitle.focus()}
   else if(opts.focusHeading){els.phaseTitle.focus()}
 }
-function nextPhase(){setPhase(current===phases.length?1:current+1,{focusHeading:true})}
-function prevPhase(){setPhase(current===1?phases.length:current-1,{focusHeading:true})}
+function nextPhase(){setPhase(currentView==='setup'?1:Math.min(phases.length,current+1),{focusHeading:true})}
+function prevPhase(){if(currentView==='setup'||current===1)showView('setup',true);else setPhase(current-1,{focusHeading:true})}
 
 /* --- Timer --- */
 function fmt(s){return ('0'+Math.floor(s/60)).slice(-2)+':'+('0'+s%60).slice(-2)}
@@ -235,7 +238,8 @@ function doReset(){
   timerSeconds=480;
   stopTimer(false);
   render();
-  showToast('All workshop notes cleared');
+  renderMetadata();showView('setup',true);
+  showToast('All V2 workshop data cleared; V1 storage preserved');
 }
 els.resetBtn.addEventListener('click',function(){
   if(typeof els.resetDialog.showModal==='function'){
@@ -284,6 +288,18 @@ els.focusBtn.addEventListener('click',function(e){
   showToast(on?'Draft panel hidden':'Draft panel shown');
 });
 
-buildTabs();
-updateTimerReadout();
-render();
+var metadataLabels={agency:'Agency name',title:'Strategy title',version:'Strategy version',date:'Workshop date',facilitator:'Facilitator',participants:'Participants or participating functions',agencyPlan:'Agency strategic-plan reference',itPlan:'IT strategic-plan reference'};
+function renderMetadata(){
+  $('metadataFields').innerHTML=SandboxState.metadataKeys.map(function(k){return '<label for="meta-'+k+'">'+metadataLabels[k]+'<input id="meta-'+k+'" type="'+(k==='date'?'date':'text')+'" data-meta="'+k+'" value="'+esc(state.metadata[k])+'"></label>'}).join('');
+}
+function showView(view,focus){
+  currentView=view;stopTimer(false);
+  $('setupPanel').hidden=view!=='setup';
+  els.phaseTabs.hidden=view!=='phase';els.phasePanel.hidden=view!=='phase';
+  $('setupBtn').setAttribute('aria-pressed',String(view==='setup'));
+  if(view==='setup'){document.title='Workshop setup — '+APP_NAME;if(focus)$('setupTitle').focus()}
+}
+$('metadataFields').addEventListener('input',function(e){if(e.target.dataset.meta){state.metadata[e.target.dataset.meta]=e.target.value;save()}});
+$('setupBtn').addEventListener('click',function(){showView('setup',true)});
+$('beginBtn').addEventListener('click',function(){setPhase(1,{focusHeading:true})});
+buildTabs();updateTimerReadout();render();renderMetadata();showView('setup',false);
