@@ -261,6 +261,7 @@ body.focus-mode .workspace{box-shadow:var(--shadow2)}
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<script src="assets/state.js"></script>
 <script>
 'use strict';
 var phases=[['Summary','Executive Summary','The Stress-Test Interview','Stress-test the agency problem AI should help solve before writing the strategic rationale.','What is the single biggest problem our agency hopes AI will solve this year?','Problem statement','Example: Reduce staff time spent summarizing high-volume public comments while preserving accuracy and public trust.',function(c){return 'We are a state agency considering adopting AI to solve this problem: "'+c+'". Act as a cynical technology auditor. Ask us 3 hard, critical questions about potential public backlash, hidden operational costs, or mission creep that we have not thought of yet.'},[['Q','Hard Questions','Read the AI questions aloud before answering them.'],['M','Mission Lens','Tie every answer back to public value.'],['B','Boundary','Name at least one thing AI will not do.']],['Public value','Mission fit','Clear boundaries']],
@@ -275,7 +276,7 @@ var phases=[['Summary','Executive Summary','The Stress-Test Interview','Stress-t
 ['Metrics','Success Metrics and Evaluation','The Unintended Consequences Review','Balance efficiency metrics with compliance, quality, and trust indicators.','If we measure success only by time saved, what bad behavior might we encourage?','Efficiency-only risk','Example: Staff may skip review, over-automate sensitive work, or optimize speed over fairness.',function(c){return 'If a state agency evaluates its AI strategy solely on efficiency and speed, what risks are they ignoring? Use this concern as context: "'+c+'". Suggest 2 risk-monitoring or compliance-auditing metrics we should track alongside efficiency to keep the strategy balanced.'},[['S','Speed','Keep useful efficiency metrics.'],['R','Risk','Add monitoring and audit metrics.'],['L','Learning','Commit to regular strategy review.']],['Efficiency metric','Risk metric','Review cadence']]
 ].map(function(p,i){return {id:i+1,short:p[0],title:p[1],exercise:p[2],copy:p[3],discussion:p[4],label:p[5],placeholder:p[6],prompt:p[7],media:p[8],chips:p[9]}});
 
-var STORAGE_KEY='ai-strategy-socratic-sandbox-v1:'+location.pathname;
+var STORAGE_KEY='ai-strategy-socratic-sandbox-v2:'+location.pathname;
 var APP_NAME='AI Strategy Socratic Sandbox';
 var current=1,timerSeconds=480,timerHandle=null,storageOk=true;
 
@@ -289,17 +290,13 @@ function esc(v){return String(v).replace(/[&<>"']/g,function(c){return {'&':'&am
 function setText(el,txt){if(el.textContent!==txt)el.textContent=txt}
 function phase(){return phases.find(function(p){return p.id===current})}
 
-function defaults(){var o={};phases.forEach(function(p){o[p.id]={context:'',consensus:'',notes:''}});return o}
-function load(){
-  var b=defaults();
-  try{
-    var s=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
-    phases.forEach(function(p){b[p.id]=Object.assign(b[p.id],s[p.id]||{})});
-  }catch(e){}
-  return b;
-}
-var state=load();
+function defaults(){return SandboxState.defaults()}
+var loaded=SandboxState.load({getItem:function(key){return localStorage.getItem(key)}},STORAGE_KEY);
+var state=loaded.state;
+var storageBlocked=!!loaded.error;
+if(storageBlocked){storageOk=false;setText(els.saveStatus,'Saved workspace could not be loaded. Reset to start fresh; existing storage has not been overwritten.')}
 function save(){
+  if(storageBlocked){renderDraft();return}
   try{
     localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
     flashSave();
@@ -336,7 +333,7 @@ function buildTabs(){
 }
 function updateTabs(){
   els.phaseTabs.querySelectorAll('[role=tab]').forEach(function(t){
-    var id=+t.dataset.phase,selected=id===current,captured=!!state[id].consensus.trim();
+    var id=+t.dataset.phase,selected=id===current,captured=!!state.phases[id].consensus.trim();
     t.setAttribute('aria-selected',selected?'true':'false');
     t.tabIndex=selected?0:-1;
     t.dataset.captured=captured;
@@ -346,7 +343,7 @@ function updateTabs(){
 }
 
 function render(){
-  var p=phase(),s=state[current];
+  var p=phase(),s=state.phases[current];
   updateTabs();
   els.phasePanel.setAttribute('aria-labelledby','tab-'+p.id);
   document.title='Phase '+p.id+': '+p.title+' — '+APP_NAME;
@@ -375,7 +372,7 @@ function render(){
 }
 
 function renderDraft(){
-  var captured=phases.filter(function(p){return state[p.id].consensus.trim()}).length;
+  var captured=phases.filter(function(p){return state.phases[p.id].consensus.trim()}).length;
   var pct=Math.round(captured/phases.length*100);
   setText(els.progressText,captured+' of '+phases.length+' sections captured.');
   setText(els.phaseProgressLabel,'Workshop progress: '+captured+' of '+phases.length+' captured');
@@ -383,7 +380,7 @@ function renderDraft(){
   els.sideProgressBar.style.width=pct+'%';
   els.draftScroll.innerHTML=phases.map(function(p){
     var isCurrent=p.id===current;
-    return '<article class="draft-section'+(isCurrent?' current':'')+'"'+(isCurrent?' aria-current="true"':'')+'><h3>'+p.id+'. '+esc(p.title)+(isCurrent?'<span class="vh"> (current phase)</span>':'')+'</h3><p>'+esc(state[p.id].consensus.trim()||'Awaiting group consensus.')+'</p></article>';
+    return '<article class="draft-section'+(isCurrent?' current':'')+'"'+(isCurrent?' aria-current="true"':'')+'><h3>'+p.id+'. '+esc(p.title)+(isCurrent?'<span class="vh"> (current phase)</span>':'')+'</h3><p>'+esc(state.phases[p.id].consensus.trim()||'Awaiting group consensus.')+'</p></article>';
   }).join('');
   updateTabs();
 }
@@ -391,7 +388,7 @@ function renderDraft(){
 function addChip(c){
   var b=els.consensusInput,pfx=b.value.trim()?b.value.trim()+'\n':'';
   b.value=pfx+c+': ';
-  state[current].consensus=b.value;
+  state.phases[current].consensus=b.value;
   b.focus();
   save();
 }
@@ -437,12 +434,12 @@ function stopTimer(announce){
 function plainText(){
   return ['Agency AI Adoption Strategy Workshop Capture','','Drafted from Socratic Sandbox consensus notes.','']
     .concat(phases.reduce(function(a,p){
-      return a.concat([p.id+'. '+p.title,'',state[p.id].consensus.trim()||'Awaiting group consensus.','']);
+      return a.concat([p.id+'. '+p.title,'',state.phases[p.id].consensus.trim()||'Awaiting group consensus.','']);
     },[])).join('\n');
 }
 function draftHtml(){
   var body=phases.map(function(p){
-    var c=state[p.id].consensus.trim();
+    var c=state.phases[p.id].consensus.trim();
     return '<h2>'+p.id+'. '+esc(p.title)+'</h2><p>'+(c?esc(c).replace(/\n/g,'<br>'):'<em>Awaiting group consensus.</em>')+'</p>';
   }).join('');
   return '<h1>Agency AI Adoption Strategy Workshop Capture</h1><p><em>Drafted from Socratic Sandbox consensus notes.</em></p>'+body;
@@ -532,7 +529,7 @@ function showToast(m){
 
 /* --- Reset --- */
 function doReset(){
-  try{localStorage.removeItem(STORAGE_KEY)}catch(e){}
+  try{localStorage.removeItem(STORAGE_KEY);storageBlocked=false;storageOk=true;setText(els.saveStatus,'Workspace cleared')}catch(e){showToast('Browser storage could not be cleared. Reset was not completed.');return}
   state=defaults();
   current=1;
   timerSeconds=480;
@@ -554,13 +551,13 @@ els.resetDialog.addEventListener('close',function(){
 
 /* --- Wiring --- */
 els.contextInput.addEventListener('input',function(e){
-  state[current].context=e.target.value;
+  state.phases[current].context=e.target.value;
   els.promptText.textContent=phase().prompt(e.target.value.trim()||'[Insert '+phase().label+']');
   save();
 });
-els.notesInput.addEventListener('input',function(e){state[current].notes=e.target.value;save()});
+els.notesInput.addEventListener('input',function(e){state.phases[current].notes=e.target.value;save()});
 els.consensusInput.addEventListener('input',function(e){
-  state[current].consensus=e.target.value;
+  state.phases[current].consensus=e.target.value;
   setText(els.phasePill,e.target.value.trim()?'Captured':'Not captured');
   save();
 });

@@ -69,3 +69,5 @@ At each stage inspect relevant code, make coherent changes, run checks, review d
 
 ## Stage evidence and limitations
 Stage 0: repository and workflow inspected; V1 Chrome baseline passed. Tag and branch pushed successfully. No application code changed. Exact named Exec Team template is not in the repository; official EIS page links `Attachment-A-AI-Adoption-Strategy-Template.docx`, to be inspected as a public reference unless the named file is supplied.
+
+Stage 1: added pure validated V2 state module and three unit tests; old UI adapted to phases envelope. Chrome V1-flow regression passed. Corrupt/unsupported saved state is preserved until explicit reset. Temporary consensus field is retained only until structured capture stage.
