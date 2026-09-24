@@ -27,3 +27,5 @@ This supersedes the expanded V2 workflow specification following user review of 
 
 ## Verification and delivery
 Compare against v1.0, test all ten guide/chip/prompt interactions, capture/autosave/reset/migration, keyboard/timer/copy/focus, desktop/mobile/reduced motion and axe in Chrome/Edge. Verify export structure and Word rendering. Update README and PR to this narrower scope. Publish the tested refresh at the already authorized Pages URL, preserve main/v1.0 and provide the standalone HTML directly.
+
+Implemented and checked: the V1 baseline smoke test, eight unit tests, all-ten-phase Chrome/Edge regressions, ten axe scans, twelve OOXML fixtures and isolated offline one-file exports pass. Word opens empty/partial/complete/long-text reports normally; all rendered pages were inspected. Source modules and license notices are embedded by `npm run package`. See QA.md for coverage and limits.

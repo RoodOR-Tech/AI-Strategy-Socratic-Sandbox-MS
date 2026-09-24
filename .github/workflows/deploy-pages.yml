@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   deploy:
-    # V2 can be published deliberately before merge; branch pushes never deploy it.
+    # The review branch can be published deliberately; branch pushes never deploy it.
     if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/v2-strategy-redesign')
     runs-on: ubuntu-latest
     environment:
@@ -38,7 +38,6 @@ jobs:
           mkdir _site
           cp index.html _site/
           cp ai-strategy-socratic-sandbox.aspx _site/
-          cp -R assets templates _site/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
