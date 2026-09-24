@@ -25,9 +25,10 @@ function save(){
   if(storageBlocked){renderDraft();return}
   try{
     localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+    storageOk=true;
     flashSave();
   }catch(e){
-    if(storageOk){storageOk=false;setText(els.saveStatus,'Autosave unavailable — copy or export your draft before closing')}
+    if(storageOk){storageOk=false;setText(els.saveStatus,'Autosave unavailable — keep this tab open and copy unsaved notes before closing')}
   }
   renderDraft();
 }
@@ -115,8 +116,7 @@ function setPhase(id,opts){
   render();
   window.scrollTo({top:0,behavior:reducedMotion&&reducedMotion.matches?'auto':'smooth'});
   if(opts.focusTab){$('tab-'+current).focus()}
-  else if(!opts.focusHeading){els.phaseTitle.focus()}
-  else if(opts.focusHeading){els.phaseTitle.focus()}
+  else{els.phaseTitle.focus()}
 }
 function nextPhase(){if(currentView==='synthesis'||(currentView==='phase'&&current===10)){showView('synthesis',true);return}setPhase(currentView==='setup'?1:current+1,{focusHeading:true})}
 function prevPhase(){if(currentView==='synthesis'){setPhase(10,{focusHeading:true});return}if(currentView==='setup'||current===1)showView('setup',true);else setPhase(current-1,{focusHeading:true})}
@@ -130,10 +130,11 @@ function updateTimerReadout(){
 }
 function toggleTimer(){
   if(timerHandle){stopTimer(true);return}
+  if(!timerSeconds)timerSeconds=480;
   timerHandle=setInterval(function(){
     timerSeconds=Math.max(0,timerSeconds-1);
     updateTimerReadout();
-    if(!timerSeconds){stopTimer(false);showToast('Time is up — capture the group consensus')}
+    if(!timerSeconds){stopTimer(false);showToast('Time is up — capture the group’s decisions')}
   },1000);
   updateTimerReadout();
   showToast('Timer started: '+fmt(timerSeconds)+' remaining');
@@ -165,6 +166,7 @@ async function exportWord(){
   finally{exportInProgress=false;buttons.forEach(function(b){b.disabled=false})}
 }
 function legacyCopy(text){
+  var previousFocus=document.activeElement;
   var ta=document.createElement('textarea');
   ta.value=text;
   ta.setAttribute('readonly','');
@@ -175,6 +177,7 @@ function legacyCopy(text){
   var ok=false;
   try{ok=document.execCommand('copy')}catch(e){}
   ta.remove();
+  if(previousFocus&&previousFocus.isConnected)previousFocus.focus();
   return ok;
 }
 function copyText(text,btn,label){
@@ -224,11 +227,12 @@ function showToast(m){
 function doReset(){
   try{localStorage.removeItem(STORAGE_KEY);storageBlocked=false;storageOk=true;setText(els.saveStatus,'Workspace cleared')}catch(e){showToast('Browser storage could not be cleared. Reset was not completed.');return}
   state=defaults();
+  clearTimeout(flashSave.t);
   current=1;
   timerSeconds=480;
   stopTimer(false);
   render();
-  renderMetadata();showView('setup',true);
+  renderMetadata();renderSynthesis();showView('setup',true);
   showToast('All V2 workshop data cleared; V1 storage preserved');
 }
 els.resetBtn.addEventListener('click',function(){
@@ -274,6 +278,7 @@ els.prevTopBtn.addEventListener('click',prevPhase);
 els.timerBtn.addEventListener('click',toggleTimer);
 els.focusBtn.addEventListener('click',function(e){
   var on=document.body.classList.toggle('focus-mode');
+  e.currentTarget.setAttribute('aria-pressed',String(on));
   setText(e.currentTarget,on?'Show Draft':'Focus Mode');
   showToast(on?'Draft panel hidden':'Draft panel shown');
 });

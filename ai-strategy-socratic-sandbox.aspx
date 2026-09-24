@@ -4,7 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="connect-src 'none'; object-src 'none'; base-uri 'none'">
 <title>AI Strategy Socratic Sandbox</title>
+<link rel="icon" href="assets/brand/eis-logo.png">
 <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body>
@@ -23,7 +25,7 @@
     <button class="btn ghost" id="prevTopBtn" type="button">Previous phase</button>
     <button class="btn ghost" id="nextTopBtn" type="button">Next phase</button>
     <button class="btn ghost" id="synthesisBtn" type="button">Strategy synthesis</button>
-    <button class="btn secondary" id="focusBtn" type="button">Focus Mode</button>
+    <button class="btn secondary" id="focusBtn" type="button" aria-pressed="false">Focus Mode</button>
     <button class="btn secondary" id="resetBtn" type="button">Reset</button>
     <button class="btn" id="exportTopBtn" type="button">Export DOCX</button>
   </div>

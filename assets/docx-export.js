@@ -24,7 +24,7 @@
     if(model.priorities.length){
       content.push(heading(t.roadmapTitle,d.HeadingLevel.HEADING_1));
       model.priorities.forEach(function(p,i){
-        content.push(heading(p.priority||'Priority '+(i+1),d.HeadingLevel.HEADING_2));
+        content.push(heading(p.priority.trim()||'Priority '+(i+1),d.HeadingLevel.HEADING_2));
         var labels={action:'Immediate next action',owner:'Accountable owner',dependency:'Major dependency',timeframe:'Target timeframe',risks:'Unresolved decisions / risks'};
         Object.keys(labels).forEach(function(k){if(p[k].trim()){
           var lines=p[k].replace(/\r\n?/g,'\n').split('\n').filter(function(s){return s.trim()}).map(function(s){return {bullet:/^\s*[-*•]\s+/.test(s),text:s.replace(/^\s*[-*•]\s+/,'').trim()}});

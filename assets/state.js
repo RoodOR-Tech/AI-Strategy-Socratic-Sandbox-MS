@@ -29,14 +29,14 @@
       if(record(src.capture))Object.keys(src.capture).forEach(function(k){
         if(/^field[0-3]$/.test(k)&&typeof src.capture[k]==='string')dst.capture[k]=src.capture[k];
       });
-      dst.approved=src.approved===true;
+      dst.approved=src.approved===true&&hasCapture(dst);
     }
     if(record(raw.synthesis)){
       if(Array.isArray(raw.synthesis.priorities)){
         out.synthesis.priorities=raw.synthesis.priorities.slice(0,5).map(function(p){var dst=priority();strings(dst,p,priorityKeys);return dst});
         while(out.synthesis.priorities.length<3)out.synthesis.priorities.push(priority());
       }
-      out.synthesis.approved=raw.synthesis.approved===true;
+      out.synthesis.approved=raw.synthesis.approved===true&&out.synthesis.priorities.some(function(p){return priorityKeys.some(function(k){return p[k].trim()})});
     }
     return out;
   }

@@ -4,4 +4,4 @@
 
 Source: https://github.com/dolanmiu/docx and https://www.npmjs.com/package/docx/v/9.6.1. Copied from the managed dependency bundle. SHA-256: `ecef72931c98461fc327aa6e95867820aced5db4c3d971ac5ad38ccda21dd360`.
 
-License: `docx-LICENSE`. Upstream notices in the bundle are retained. No runtime CDN, network content transfer, telemetry, or build pipeline. Upgrade deliberately: replace bundle/license, update hash/version here, then run structural, browser, and Word rendering regression tests.
+License: `docx-LICENSE`; dependency license texts are in `THIRD-PARTY-NOTICES.txt`. Upstream notices in the bundle are retained. No runtime CDN, network content transfer, telemetry, or build pipeline. Upgrade deliberately: replace bundle/license, update hash/version here, then run structural, browser, and Word rendering regression tests.

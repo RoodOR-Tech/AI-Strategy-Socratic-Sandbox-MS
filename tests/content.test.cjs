@@ -14,4 +14,5 @@ test('roadmap requires explicit approval and omits empty priority slots',()=>{
  const s=S.defaults();s.synthesis.priorities[0].priority='Review intake';s.synthesis.priorities[0].owner='Business owner';
  assert.equal(C.model(s,phases).priorities.length,0);s.synthesis.approved=true;
  const m=C.model(s,phases);assert.equal(m.priorities.length,1);assert.ok(C.text(m).includes('Implementation Priorities'));assert.ok(!C.text(m).includes('11.'));
+ s.synthesis.priorities[0].priority='   ';assert.ok(C.text(C.model(s,phases)).includes('Priority 1'));
 });

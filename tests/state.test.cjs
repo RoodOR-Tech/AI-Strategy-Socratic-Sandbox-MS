@@ -17,4 +17,6 @@ test('load validates types, schema and unsafe fields without importing V1',()=>{
   assert.ok(S.load({getItem:()=>'{broken'},'v2').error);
   assert.ok(S.load({getItem:()=>{throw Error('Denied')}},'v2').error);
   assert.equal(S.load({getItem:()=>null},'v2').error,null);
+  const empty=S.defaults();empty.phases[1].approved=true;empty.synthesis.approved=true;
+  assert.equal(S.normalize(empty).phases[1].approved,false);assert.equal(S.normalize(empty).synthesis.approved,false);
 });

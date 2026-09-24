@@ -1,102 +1,87 @@
-# AI Strategy Socratic Sandbox
+# AI Strategy Socratic Sandbox V2
 
-A static, single-file workshop app for guiding an agency AI adoption strategy session.
-It runs entirely in the browser, makes **zero network calls**, and stores workshop notes
-only in the browser's local storage on the user's device.
+A browser-only, facilitated workshop for developing a public-sector AI Adoption Strategy:
 
-Two copies of the same app ship in this repo:
+**Huddle → interrogate an approved AI tool → debate → decide → capture → export.**
 
-| File | Purpose |
-|---|---|
-| `index.html` | Canonical source. Served on GitHub Pages and usable on any static web host. |
-| `ai-strategy-socratic-sandbox.aspx` | Byte-identical copy for SharePoint document libraries, which render `.aspx` in the browser but force `.html` files to download or open in a preview pane. |
+AI is a Socratic challenger. People own the judgments, priorities, accountability and final language. The app has no embedded chatbot, accounts, backend, database, API, telemetry, or content transmission.
 
-**If you edit `index.html`, regenerate the copy:** `cp index.html ai-strategy-socratic-sandbox.aspx`
+V1 remains on `main` and tag `v1.0` at `4782ba0` while V2 is reviewed on `v2-strategy-redesign`. Nothing in this work merges or deploys V2 over the stable site. [V2-SPEC.md](V2-SPEC.md) is the implementation source of truth; [QA.md](QA.md) records verification and remaining manual checks.
 
-## Live app — GitHub Pages
+## Use the workshop
 
-The app is published at:
+1. Open `index.html` from a static host or a downloaded **complete folder**. Optional setup captures agency, title, version, date, facilitator, participating functions, and planning references. No field is required to begin.
+2. Work through the ten Oregon strategy sections. Establish local context, copy the prompt into an enterprise-approved AI tool, and return with its response. Share only information permitted in that tool.
+3. Debate the response. Context, AI scratchpad and optional discussion notes remain private working material.
+4. Write the group's strategy decisions in the section-specific fields. A line starting with `- `, `* ` or `• ` becomes a bullet. Check the approval box to include that section in the strategy. Editing a strategy field revokes its approval until the group reviews it again.
+5. After Phase 10, use **Strategy synthesis** to identify 3–5 near-term priorities, next actions, owners, dependencies, timeframes and unresolved risks. Approve the roadmap separately. Partial work is permitted.
+6. Review the developing strategy, then **Export DOCX** or **Copy Draft**. Only approved strategy content and the setup metadata appear. Unapproved text and private notes never automatically become strategy language.
 
-**<https://roodor-tech.github.io/AI-Strategy-Socratic-Sandbox-MS/>**
+The ten numbered components remain Executive Summary; Guiding Principles; Governance; Intake and Evaluation; Data; Tool Adoption; Training; Human Oversight; Transparency & Public Trust; and Success Metrics. **Implementation Priorities is separate, not Section 11.**
 
-Deployment is automated by `.github/workflows/deploy-pages.yml`: every push to `main`
-republishes the site (only `index.html` and the `.aspx` copy are deployed). No build step.
+## Storage and privacy
 
-If the first workflow run fails with a "Pages site not found / not enabled" error, a repo
-admin needs to enable it once: **Settings → Pages → Build and deployment → Source →
-GitHub Actions**, then re-run the workflow.
+- Autosave uses `ai-strategy-socratic-sandbox-v2:` plus the page pathname. Metadata, each phase's context/scratchpad/discussion/structured capture/approval, and synthesis are stored with schema version 2 and app version 2.0.0.
+- V1 storage is separate and is never migrated, overwritten or deleted. V2 begins fresh to avoid treating old workshop consensus as approved strategy.
+- Reset confirms before removing all data for the current V2 workspace, clearing its in-memory fields, and returning to setup. Other page paths, other browsers, and V1 storage are independent.
+- Notes do not roam between browsers or devices. Private browsing, browser cleanup, storage policy, or quota can prevent persistence. Visible status reports failures. Corrupt/unknown-schema data is not overwritten; use Reset deliberately to start fresh. When storage is unavailable, keep the tab open and copy working notes before closing; DOCX/Copy Draft contain approved content only.
+- Static HTML, scripts, styles, logo and fonts load from the same host. No workshop content is sent by the application; there are no runtime CDNs or external requests. Clipboard transfer into an external AI is a deliberate participant action governed by that tool's policies.
 
-> Note: workshop notes are stored in the visitor's own browser (local storage, keyed per
-> page URL). Nothing is ever sent to the server, so the public URL carries no data risk —
-> but notes do not roam between devices or browsers.
+## Architecture
 
-## Deploy to SharePoint
+No application build step is required. Vanilla HTML/CSS/JavaScript remains the architecture.
 
-### SharePoint Server Subscription Edition (on-premises)
+| File | Responsibility |
+| --- | --- |
+| `index.html` | Canonical semantic UI |
+| `ai-strategy-socratic-sandbox.aspx` | Byte-identical SharePoint entry point |
+| `assets/app.js` | UI, autosave, navigation, timer, clipboard, reset and downloads |
+| `assets/state.js` | Defaults, validation and versioned storage loading |
+| `assets/phases.js` | Ten Socratic exercises, guardrails and capture fields |
+| `assets/strategy-content.js` | Shared approval boundary for preview, copy and DOCX |
+| `assets/styles.css`, `assets/brand/` | Responsive EIS design and local fonts/logo |
+| `templates/oregon-strategy.js` | Dedicated Oregon-based DOCX template |
+| `assets/docx-export.js` | Approved model to OOXML paragraphs/headings/lists |
+| `assets/vendor/` | Pinned browser DOCX library, licenses and checksum |
 
-1. Upload `ai-strategy-socratic-sandbox.aspx` to any document library (e.g. Site Assets or Documents).
-2. Users click the file and it opens as a full page in the browser. That's it — on-prem
-   SharePoint renders library `.aspx` pages by default. Only client-side script is used;
-   nothing runs on the server.
+The export uses locally bundled **docx 9.6.1** (MIT), with its upstream dependencies contained in one browser distribution. It creates the OOXML ZIP on the device. It does not disguise HTML as Word. The [template notes](templates/README.md) document the confirmed [Oregon Attachment A reference](https://www.oregon.gov/eis/Documents/Attachment-A-AI-Adoption-Strategy-Template.docx), style measurements, and intentional removal of instructional content.
 
-### SharePoint Online (Microsoft 365)
+DOCX includes agency identification, supplied workshop/planning metadata, all ten official headings, approved fields, genuine bullets, implementation priorities, generation date, app version and page numbers. Blank fields are omitted; an incomplete strategy retains empty section headings. Filenames are sanitized and length-bounded, for example `Agency-AI-Adoption-Strategy-v2.1.docx`. Fonts may substitute on machines without Aptos. Successful export is not organizational approval beyond the decisions the group marked for inclusion.
 
-SharePoint Online blocks custom script on most sites by default (`DenyAddAndCustomizePages`).
-With custom script blocked, an uploaded `.aspx` page will not execute its JavaScript and the
-page shows its built-in "JavaScript required" notice instead of the app.
+## Static hosting and SharePoint
 
-Options, in order of preference:
+Host these together, preserving relative paths:
 
-1. **Enable custom script on one dedicated site** (admin action), then upload the `.aspx`
-   to a library on that site:
-   `Set-SPOSite -Identity https://tenant.sharepoint.com/sites/workshops -DenyAddAndCustomizePages $false`
-   Scope this to a single, controlled site — do not enable it tenant-wide.
-2. **Link to the GitHub Pages site** (see above) from SharePoint, or surface it in a
-   modern page with the **Embed** web part (a site admin must add
-   `roodor-tech.github.io` to the site's allowed iframe domains under
-   Site Settings → HTML Field Security).
-3. If neither is possible, users can still download the `.html` file and open it locally —
-   the app is fully self-contained.
+```text
+index.html
+ai-strategy-socratic-sandbox.aspx
+assets/
+templates/
+```
 
-### Why it is safe for a SharePoint environment
+This is a deliberate V1 packaging change: **V2 is a static folder, not a single self-contained file.** An `.aspx` entry point alone is insufficient. After changing HTML, regenerate the identical copy with `cp index.html ai-strategy-socratic-sandbox.aspx` (PowerShell: `Copy-Item index.html ai-strategy-socratic-sandbox.aspx`). `npm run check` checks parity.
 
-- No external scripts, styles, fonts, images, or network requests of any kind — the page
-  is one self-contained file, so there is nothing for a CSP or firewall to worry about.
-- No server-side code (`<%` blocks or `runat="server"`) — SharePoint parses the `.aspx`
-  as static markup and everything runs client-side.
-- All dynamic text is HTML-escaped before rendering, and workshop notes never leave the
-  browser. Local storage is keyed by page path, so copies in different libraries keep
-  separate state.
-- Clipboard and file download have graceful fallbacks with clear user messaging for
-  locked-down browsers and embedded webviews; if local storage is unavailable, the app
-  says so and keeps working for the session.
+GitHub Pages uses `.github/workflows/deploy-pages.yml`. It stages both entry points and their local assets. Deployment is restricted to `main`, including manual runs; feature-branch tests do not publish V2. The existing stable site is [GitHub Pages](https://roodor-tech.github.io/AI-Strategy-Socratic-Sandbox-MS/).
 
-## Accessibility (WCAG 2.1 Level AA)
+For a SharePoint library, upload the entry point and both asset folders with the same hierarchy. SharePoint's existing custom-script restrictions still apply. SharePoint Online may block `.aspx` script execution under `DenyAddAndCustomizePages`; use an approved host or have the administrator assess its configuration. A real SharePoint tenant deployment has not been verified here. Downloading the complete static folder and opening `index.html` locally is supported and tested.
 
-The app is built to WCAG 2.1 AA per `CLAUDE-accessibility-directive.md`:
+## Development checks
 
-- Semantic landmarks (`header`, `main`, `aside`, `footer`), a skip-to-content link, and a
-  logical heading hierarchy.
-- The phase switcher implements the ARIA APG **tabs** pattern: roving tabindex,
-  Left/Right/Home/End arrow navigation, `aria-selected`, and a labelled tab panel.
-  Captured/not-captured state is in each tab's accessible name, not conveyed by the
-  green dot alone.
-- Focus management: Previous/Next moves focus to the new phase heading and
-  `document.title` updates on every phase change. The reset confirmation is a native
-  `<dialog>` (focus trap, Escape, focus return for free).
-- Live regions announce autosave status, capture progress, phase capture state, and all
-  toast messages (copy/export/timer/reset). The countdown uses `role="timer"` and does
-  **not** announce every second.
-- Visible `:focus-visible` indicators on all interactive elements; text and UI contrast
-  verified ≥ 4.5:1 / 3:1; no fixed text heights; reflows without horizontal scroll at
-  320 px; non-essential motion disabled under `prefers-reduced-motion: reduce`.
+Node is needed **only for development tests**, not hosting, DOCX generation, or workshop use. Pinned Playwright and axe dev dependencies are in `package-lock.json`. The local HTTP server exists only inside the test harness.
 
-**Verification:** axe-core (WCAG 2.1 A/AA + best-practice rules) run via Playwright against
-the initial view, the open reset dialog, and a populated later phase — 0 violations — plus
-a scripted keyboard-only pass (skip link, tablist arrows, dialog Escape/focus return, timer,
-chips, focus mode). Automated tools catch only part of WCAG; a manual screen reader pass
-(NVDA/JAWS) is still recommended before certifying compliance.
+```sh
+npm ci
+npx playwright install chromium
+npm run check
+npm test
+npm run test:browser
+python tests/verify_docx.py
+```
 
-**Known limitation:** the export is a plain-text Markdown file, which carries its heading
-structure as text. If a formally tagged accessible document (e.g. tagged PDF) is required
-for distribution, convert the Markdown in Word or another tool that produces tagged output.
+For installed Chrome/Edge, set `BROWSER_CHANNELS=chrome,msedge` before running browser tests. Otherwise tests use Playwright Chromium. CI installs Chromium automatically. Generated screenshots and DOCX fixtures go to ignored `test-results/`; no real workshop data is used.
+
+Tests cover approval boundaries, safe state loading, all phases, keyboard tabs/focus, timer, clipboard/fallback, setup/synthesis, storage/reset, responsive layouts, axe, absence of external/content requests, HTML escaping, local/SharePoint entry points, and empty/partial/full/Unicode DOCX. Standard-library Python validates OOXML. Word and visual checks are documented in [QA.md](QA.md).
+
+## Accessibility
+
+The app preserves semantic landmarks, skip navigation, labelled fields, ARIA tab keyboard behavior, focus management, live status, visible focus, a native reset dialog, reduced-motion support and 320px reflow. Documents use Word Title/Heading styles and real lists. Automated checks support, but do not certify, WCAG conformance. A human NVDA/JAWS pass and agency review of exported content remain appropriate before public release. See the [accessibility directive](CLAUDE-accessibility-directive.md) and [QA evidence](QA.md).

@@ -57,14 +57,14 @@ At each stage inspect relevant code, make coherent changes, run checks, review d
 
 ## Acceptance checklist
 - [x] Stable V1 recoverable on unchanged main and v1.0; separate V2 branch.
-- [ ] Static deployable, local-only content, no unnecessary infrastructure.
-- [ ] Ten official components and original facilitated Socratic flow.
-- [ ] Optional setup, structured human-approved capture, separate synthesis.
-- [ ] Document-like preview and Oregon visual identity.
-- [ ] Real template-anchored DOCX with headings/bullets/metadata/roadmap; no scratchpad.
-- [ ] Accessibility/responsiveness maintained or improved with regression evidence.
-- [ ] Autosave, refresh, reset and schema separation verified.
-- [ ] Architecture, dependencies, hosting and known limitations documented.
+- [x] Static deployable, local-only content, no unnecessary infrastructure.
+- [x] Ten official components and original facilitated Socratic flow.
+- [x] Optional setup, structured human-approved capture, separate synthesis.
+- [x] Document-like preview and Oregon visual identity.
+- [x] Real template-anchored DOCX with headings/bullets/metadata/roadmap; no scratchpad.
+- [x] Accessibility/responsiveness maintained or improved with regression evidence.
+- [x] Autosave, refresh, reset and schema separation verified.
+- [x] Architecture, dependencies, hosting and known limitations documented.
 - [ ] Focused stage commits and reviewable PR; no merge to main.
 
 ## Stage evidence and limitations
@@ -79,3 +79,5 @@ Stage 3: added optional metadata setup, local EIS logo/Inter assets with provena
 Stage 4: separate synthesis step follows Phase 10; three expandable priority cards, up to five, capture action/owner/dependency/timeframe/risks. Explicit roadmap approval uses the shared preview/export boundary. Six unit tests and Chrome navigation/add/remove/approval/reload checks passed; synthesis axe scan reported zero violations.
 
 Stage 5: genuine browser-only DOCX implemented using locally vendored docx 9.6.1 and templates/oregon-strategy.js. Confirmed Attachment A has Aptos/Aptos Display, blue 16/13pt headings, Letter pages and one-inch margins. Eight unit tests and browser downloads passed. Four fixtures (empty, partial, full, long/Unicode/control characters) passed ZIP/all-XML validation, headings, bullets, filenames, metadata and private-content exclusion. Microsoft Word 16.0 normal read-only opening and PDF rendering succeeded for all four, without invoking repair. Final sample lengths: 2/2/7/10 pages. Rendered pages inspected; roadmap spacing refined. Packaged render_docx.py cannot run here because LibreOffice is absent; actual Microsoft Word PDF export plus PDFium rasterization provided visual QA instead. No app build step added.
+
+Stage 6: reproducible dev-only Playwright/axe tests and standard-library OOXML checks added, with pinned dev dependencies and CI. Chrome and Edge passed complete flow/keyboard/timer/clipboard/storage/privacy checks, 20 axe scans with zero violations, and 12 DOCX downloads with successful package validation. Timer restart, clipboard focus, reset hidden-field cleanup and invalid empty approvals hardened. Pages now stages local assets and deploys only main. README/QA document packaging, verification and limitations. Manual NVDA/JAWS and actual SharePoint deployment remain unverified; see QA.md. Review PR and remote CI are the final delivery steps.
