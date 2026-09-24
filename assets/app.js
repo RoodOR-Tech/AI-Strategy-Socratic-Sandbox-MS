@@ -148,32 +148,21 @@ function stopTimer(announce){
 function strategyModel(){return StrategyContent.model(state,phases)}
 function plainText(){return StrategyContent.text(strategyModel())}
 function draftHtml(preview){return StrategyContent.html(strategyModel(),!!preview)}
-function wordDocument(){
-  return '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'
-    +'<head><meta charset="utf-8"><title>Agency AI Adoption Strategy Workshop Capture</title>'
-    +'<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->'
-    +'<style>'
-    +'body{font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#182330}'
-    +'h1{font-size:20pt;color:#102b48}'
-    +'h2{font-size:14pt;color:#17375f;margin-top:18pt}'
-    +'p{line-height:1.4}'
-    +'</style></head><body>'+draftHtml()+'</body></html>';
-}
-function exportWord(){
+var exportInProgress=false;
+async function exportWord(){
+  if(exportInProgress)return;
+  exportInProgress=true;
+  var buttons=[els.exportWordBtn,els.exportTopBtn,$('exportSynthesisBtn')];
+  buttons.forEach(function(b){b.disabled=true});showToast('Preparing DOCX on this device…');
   try{
-    var blob=new Blob([wordDocument()],{type:'application/msword'});
-    var url=URL.createObjectURL(blob);
-    var a=document.createElement('a');
-    a.href=url;
-    a.download='agency-ai-strategy-workshop-capture.doc';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(function(){URL.revokeObjectURL(url)},2000);
-    showToast('Draft exported as Word document');
-  }catch(e){
-    showToast('Download blocked here — use Copy Draft instead');
-  }
+    var model=strategyModel();
+    var blob=await docx.Packer.toBlob(StrategyDocx.document(model,docx,OregonStrategyTemplate));
+    var url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download=StrategyDocx.filename(model.metadata);document.body.appendChild(a);a.click();a.remove();
+    setTimeout(function(){URL.revokeObjectURL(url)},60000);
+    showToast('DOCX download requested — approved strategy content only.');
+  }catch(e){showToast('DOCX export failed or is blocked here. Use Copy Draft to preserve approved content.');}
+  finally{exportInProgress=false;buttons.forEach(function(b){b.disabled=false})}
 }
 function legacyCopy(text){
   var ta=document.createElement('textarea');

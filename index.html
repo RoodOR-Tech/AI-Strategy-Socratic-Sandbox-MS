@@ -25,7 +25,7 @@
     <button class="btn ghost" id="synthesisBtn" type="button">Strategy synthesis</button>
     <button class="btn secondary" id="focusBtn" type="button">Focus Mode</button>
     <button class="btn secondary" id="resetBtn" type="button">Reset</button>
-    <button class="btn" id="exportTopBtn" type="button">Export Word</button>
+    <button class="btn" id="exportTopBtn" type="button">Export DOCX</button>
   </div>
 </header>
 
@@ -56,7 +56,7 @@
     <div><button class="btn secondary" id="addPriorityBtn" type="button">Add priority</button></div>
     <label class="approval"><input id="approveSynthesis" type="checkbox"> The group approves these implementation priorities</label>
     <p class="small">You can approve and export a partial roadmap. Blank priorities are omitted. Editing an action returns the roadmap to review.</p>
-    <div class="draft-actions"><button class="btn ghost" id="reviewSectionsBtn" type="button">Review strategy sections</button><button class="btn" id="exportSynthesisBtn" type="button">Export Word</button></div>
+    <div class="draft-actions"><button class="btn ghost" id="reviewSectionsBtn" type="button">Review strategy sections</button><button class="btn" id="exportSynthesisBtn" type="button">Export DOCX</button></div>
   </section>
   <div class="phase-tabs" id="phaseTabs" role="tablist" aria-label="Workshop phases"></div>
   <div class="phase" id="phasePanel" role="tabpanel" aria-labelledby="tab-1">
@@ -132,7 +132,7 @@
   </div>
   <div class="draft-scroll" id="draftScroll" role="region" aria-label="Captured draft sections" tabindex="0"></div>
   <div class="draft-actions">
-    <button class="btn" id="exportWordBtn" type="button">Export Word</button>
+    <button class="btn" id="exportWordBtn" type="button">Export DOCX</button>
     <button class="btn secondary" id="copyDraftBtn" type="button">Copy Draft</button>
   </div>
 </aside>
@@ -157,6 +157,9 @@
 <script src="assets/state.js"></script>
 <script src="assets/phases.js"></script>
 <script src="assets/strategy-content.js"></script>
+<script src="assets/vendor/docx-9.6.1.iife.js"></script>
+<script src="templates/oregon-strategy.js"></script>
+<script src="assets/docx-export.js"></script>
 <script src="assets/app.js"></script>
 </body>
 </html>
