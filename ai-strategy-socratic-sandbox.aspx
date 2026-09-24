@@ -22,6 +22,7 @@
     <button class="btn ghost" id="setupBtn" type="button">Workshop setup</button>
     <button class="btn ghost" id="prevTopBtn" type="button">Previous phase</button>
     <button class="btn ghost" id="nextTopBtn" type="button">Next phase</button>
+    <button class="btn ghost" id="synthesisBtn" type="button">Strategy synthesis</button>
     <button class="btn secondary" id="focusBtn" type="button">Focus Mode</button>
     <button class="btn secondary" id="resetBtn" type="button">Reset</button>
     <button class="btn" id="exportTopBtn" type="button">Export Word</button>
@@ -45,6 +46,17 @@
     <div class="setup-fields" id="metadataFields"></div>
     <p class="small">These details appear in the strategy document. All fields are optional. Workshop notes stay in this browser; V1 notes remain separate.</p>
     <div><button class="btn" id="beginBtn" type="button">Begin with Executive Summary</button></div>
+  </section>
+  <section id="synthesisPanel" class="phase" aria-labelledby="synthesisTitle" hidden>
+    <p class="kicker">After the ten sections · Implementation priorities</p>
+    <h2 id="synthesisTitle" tabindex="-1">Turn decisions into next actions</h2>
+    <p class="copy">Given everything the group decided, what will you do first? Choose 3–5 near-term priorities. Identify who will act, what they need, and when. This roadmap follows the ten strategy sections.</p>
+    <p id="synthesisStatus" class="small" role="status"></p>
+    <div id="priorityFields" class="priorities"></div>
+    <div><button class="btn secondary" id="addPriorityBtn" type="button">Add priority</button></div>
+    <label class="approval"><input id="approveSynthesis" type="checkbox"> The group approves these implementation priorities</label>
+    <p class="small">You can approve and export a partial roadmap. Blank priorities are omitted. Editing an action returns the roadmap to review.</p>
+    <div class="draft-actions"><button class="btn ghost" id="reviewSectionsBtn" type="button">Review strategy sections</button><button class="btn" id="exportSynthesisBtn" type="button">Export Word</button></div>
   </section>
   <div class="phase-tabs" id="phaseTabs" role="tablist" aria-label="Workshop phases"></div>
   <div class="phase" id="phasePanel" role="tabpanel" aria-labelledby="tab-1">
@@ -106,6 +118,7 @@
         <div id="captureFields" class="capture-fields"></div>
         <label class="approval"><input type="checkbox" id="approveSection"> The group approves this section for the strategy</label>
         <p class="small">Editing a strategy field returns this section to review. Context, AI scratchpad and discussion stay private.</p>
+        <div><button class="btn" id="nextCaptureBtn" type="button">Continue to next section</button></div>
       </div>
     </div>
   </div>

@@ -10,3 +10,8 @@ test('bullets, multiline and all ten prompt guardrails',()=>{
  phases.forEach(p=>{assert.ok(p.prompt('context').includes('Distinguish facts from assumptions'));assert.ok(p.fields.length<=4)});
  assert.ok(!phases[4].prompt('context').includes('trace the exact path'));assert.ok(phases[3].prompt('context').includes('NIST AI RMF'));
 });
+test('roadmap requires explicit approval and omits empty priority slots',()=>{
+ const s=S.defaults();s.synthesis.priorities[0].priority='Review intake';s.synthesis.priorities[0].owner='Business owner';
+ assert.equal(C.model(s,phases).priorities.length,0);s.synthesis.approved=true;
+ const m=C.model(s,phases);assert.equal(m.priorities.length,1);assert.ok(C.text(m).includes('Implementation Priorities'));assert.ok(!C.text(m).includes('11.'));
+});

@@ -77,6 +77,7 @@ function render(){
   setText(els.phaseTitle,p.title);
   setText(els.phaseCopy,p.copy);
   setText(els.phasePill,s.approved?'Approved for strategy':SandboxState.hasCapture(s)?'Needs review':'Not started');
+  setText($('nextCaptureBtn'),current===10?'Continue to Strategy Synthesis':'Continue to next section');
   setText(els.huddleHint,'Exercise: '+p.exercise);
   setText(els.discussionQuestion,p.discussion);
   setText(els.contextLabelText,p.label);
@@ -117,8 +118,8 @@ function setPhase(id,opts){
   else if(!opts.focusHeading){els.phaseTitle.focus()}
   else if(opts.focusHeading){els.phaseTitle.focus()}
 }
-function nextPhase(){setPhase(currentView==='setup'?1:Math.min(phases.length,current+1),{focusHeading:true})}
-function prevPhase(){if(currentView==='setup'||current===1)showView('setup',true);else setPhase(current-1,{focusHeading:true})}
+function nextPhase(){if(currentView==='synthesis'||(currentView==='phase'&&current===10)){showView('synthesis',true);return}setPhase(currentView==='setup'?1:current+1,{focusHeading:true})}
+function prevPhase(){if(currentView==='synthesis'){setPhase(10,{focusHeading:true});return}if(currentView==='setup'||current===1)showView('setup',true);else setPhase(current-1,{focusHeading:true})}
 
 /* --- Timer --- */
 function fmt(s){return ('0'+Math.floor(s/60)).slice(-2)+':'+('0'+s%60).slice(-2)}
@@ -295,11 +296,52 @@ function renderMetadata(){
 function showView(view,focus){
   currentView=view;stopTimer(false);
   $('setupPanel').hidden=view!=='setup';
+  $('synthesisPanel').hidden=view!=='synthesis';
+  $('synthesisBtn').setAttribute('aria-pressed',String(view==='synthesis'));
+  if(view==='synthesis'){renderSynthesis();document.title='Strategy synthesis — '+APP_NAME;if(focus)$('synthesisTitle').focus()}
   els.phaseTabs.hidden=view!=='phase';els.phasePanel.hidden=view!=='phase';
   $('setupBtn').setAttribute('aria-pressed',String(view==='setup'));
   if(view==='setup'){document.title='Workshop setup — '+APP_NAME;if(focus)$('setupTitle').focus()}
 }
 $('metadataFields').addEventListener('input',function(e){if(e.target.dataset.meta){state.metadata[e.target.dataset.meta]=e.target.value;save()}});
 $('setupBtn').addEventListener('click',function(){showView('setup',true)});
+$('synthesisBtn').addEventListener('click',function(){showView('synthesis',true)});
+$('nextCaptureBtn').addEventListener('click',nextPhase);
+$('reviewSectionsBtn').addEventListener('click',function(){setPhase(1,{focusHeading:true})});
+$('exportSynthesisBtn').addEventListener('click',exportWord);
+function priorityHasContent(p){return SandboxState.priorityKeys.some(function(k){return p[k].trim()})}
+function synthesisStatus(){
+  var count=state.synthesis.priorities.filter(priorityHasContent).length;
+  $('approveSynthesis').checked=state.synthesis.approved;
+  setText($('synthesisStatus'),count+' priorities drafted · '+(state.synthesis.approved?'Approved for strategy':'Needs group review')+(count<3?' · Aim for 3–5 priorities.':''));
+  $('addPriorityBtn').disabled=state.synthesis.priorities.length>=5;
+}
+function renderSynthesis(){
+  var labels=Object.assign({priority:'Strategic priority'},StrategyContent.priorityLabels);
+  $('priorityFields').innerHTML=state.synthesis.priorities.map(function(p,i){return '<details class="card priority-card"'+(i===0?' open':'')+'><summary id="priority-summary-'+i+'">Priority '+(i+1)+(p.priority.trim()?' — '+esc(p.priority):'')+'</summary><div class="card-body">'+SandboxState.priorityKeys.map(function(k){return '<label for="priority-'+i+'-'+k+'">'+labels[k]+'<textarea rows="2" id="priority-'+i+'-'+k+'" data-priority="'+i+'" data-key="'+k+'">'+esc(p[k])+'</textarea></label>'}).join('')+(i>=3?'<button type="button" class="btn ghost" data-remove="'+i+'">Remove priority '+(i+1)+'</button>':'')+'</div></details>'}).join('');
+  synthesisStatus();
+}
+$('priorityFields').addEventListener('input',function(e){
+  if(e.target.dataset.priority===undefined)return;
+  var i=Number(e.target.dataset.priority),k=e.target.dataset.key;
+  state.synthesis.priorities[i][k]=e.target.value;state.synthesis.approved=false;
+  if(k==='priority')setText($('priority-summary-'+i),'Priority '+(i+1)+(e.target.value.trim()?' — '+e.target.value:''));
+  synthesisStatus();save();
+});
+$('priorityFields').addEventListener('click',function(e){
+  if(e.target.dataset.remove===undefined)return;
+  var i=Number(e.target.dataset.remove);
+  if(priorityHasContent(state.synthesis.priorities[i])&&!window.confirm('Remove this priority and its captured action details?'))return;
+  state.synthesis.priorities.splice(i,1);state.synthesis.approved=false;renderSynthesis();save();$('addPriorityBtn').focus();
+});
+$('addPriorityBtn').addEventListener('click',function(){
+  if(state.synthesis.priorities.length>=5)return;
+  state.synthesis.priorities.push(SandboxState.priority());state.synthesis.approved=false;renderSynthesis();save();
+  var card=$('priorityFields').lastElementChild;card.open=true;card.querySelector('textarea').focus();
+});
+$('approveSynthesis').addEventListener('change',function(e){
+  if(e.target.checked&&!state.synthesis.priorities.some(priorityHasContent)){e.target.checked=false;showToast('Capture a priority or next action before approving.');return}
+  state.synthesis.approved=e.target.checked;synthesisStatus();save();
+});
 $('beginBtn').addEventListener('click',function(){setPhase(1,{focusHeading:true})});
 buildTabs();updateTimerReadout();render();renderMetadata();showView('setup',false);
