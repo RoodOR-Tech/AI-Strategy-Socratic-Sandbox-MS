@@ -1,5 +1,7 @@
 # AI Strategy Socratic Sandbox V2
 
+**Superseded product scope:** after reviewing the deployed V2, the user requested a V1 refresh with the original interactions, single-file delivery, accepted visual design and better DOCX export. [REFRESH-SPEC.md](REFRESH-SPEC.md) is now the implementation source of truth. This file records the earlier V2 requirements and work; its expanded workflow is no longer the target.
+
 ## Authority and purpose
 This specification implements the requested disciplined V2 evolution. It is the implementation source of truth. Humans huddle, interrogate an external approved AI, debate, decide, and capture an agency strategy. AI challenges reasoning; it does not make agency decisions. No embedded AI, accounts, backend, database, telemetry, or transmission of workshop content.
 
