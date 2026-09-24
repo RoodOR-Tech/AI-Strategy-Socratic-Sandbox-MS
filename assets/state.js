@@ -10,7 +10,7 @@
   function priority(){return {priority:'',action:'',owner:'',dependency:'',timeframe:'',risks:''}}
   function defaults(){
     var phases={};
-    for(var i=1;i<=10;i++)phases[i]={context:'',notes:'',discussion:'',consensus:'',capture:{},approved:false};
+    for(var i=1;i<=10;i++)phases[i]={context:'',notes:'',discussion:'',capture:{},approved:false};
     return {schemaVersion:VERSION,appVersion:'2.0.0',metadata:{agency:'',title:'AI Adoption Strategy',version:'1.0',date:'',facilitator:'',participants:'',agencyPlan:'',itPlan:''},phases:phases,synthesis:{priorities:[priority(),priority(),priority()],approved:false}};
   }
   function record(value){return value!==null&&typeof value==='object'&&!Array.isArray(value)}
@@ -25,7 +25,7 @@
     if(record(raw.phases))for(var i=1;i<=10;i++){
       var src=raw.phases[i],dst=out.phases[i];
       if(!record(src))continue;
-      strings(dst,src,['context','notes','discussion','consensus']);
+      strings(dst,src,['context','notes','discussion']);
       if(record(src.capture))Object.keys(src.capture).forEach(function(k){
         if(/^field[0-3]$/.test(k)&&typeof src.capture[k]==='string')dst.capture[k]=src.capture[k];
       });

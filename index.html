@@ -216,16 +216,18 @@ body.focus-mode .workspace{box-shadow:var(--shadow2)}
           <p class="small">Paste this prompt into whatever AI tool participants are already using. Bring the AI response back to the group for debate.</p>
           <label for="notesInput">AI response scratchpad</label>
           <textarea class="ai-notes" id="notesInput" aria-describedby="notesHint"></textarea>
-          <p class="small" id="notesHint">Optional: paste useful AI questions, risks, or phrases here. This will not export unless you move it into consensus.</p>
+          <p class="small" id="notesHint">Optional: paste useful AI questions, risks, or phrases here. This will not export unless the group deliberately rewrites it into approved strategy content.</p>
         </div>
       </div>
     </div>
+    <details class="card"><summary>Private workshop discussion (optional)</summary><div class="card-body"><label for="discussionInput">Unresolved discussion notes — excluded from strategy</label><textarea id="discussionInput"></textarea></div></details>
     <div class="card">
-      <div class="card-head"><h3>Step 3: Consensus Capture</h3><span class="small">This text feeds the final draft</span></div>
+      <div class="card-head"><h3>Step 3: Decide and Capture</h3><span class="small">Human-approved content only</span></div>
       <div class="card-body">
-        <label for="consensusInput">What did the group decide after discussing the AI response?</label>
-        <textarea id="consensusInput"></textarea>
-        <div class="chips" id="starterChips" role="group" aria-label="Starter phrases — insert into consensus notes"></div>
+        <p class="small" id="captureHint">Capture the group’s decisions in concise strategy language. Use a line beginning with “- ” for each bullet. Fields are optional; review before approving.</p>
+        <div id="captureFields" class="capture-fields"></div>
+        <label class="approval"><input type="checkbox" id="approveSection"> The group approves this section for the strategy</label>
+        <p class="small">Editing a strategy field returns this section to review. Context, AI scratchpad and discussion stay private.</p>
       </div>
     </div>
   </div>
@@ -233,7 +235,7 @@ body.focus-mode .workspace{box-shadow:var(--shadow2)}
 
 <aside class="draft" aria-label="Strategy draft">
   <div class="draft-head">
-    <h2>Strategy Capture</h2>
+    <h2>Developing Strategy</h2>
     <p id="progressText" aria-live="polite">0 of 10 sections captured.</p>
     <div class="progress-track" aria-hidden="true"><div class="progress-bar" id="sideProgressBar"></div></div>
   </div>
@@ -252,7 +254,7 @@ body.focus-mode .workspace{box-shadow:var(--shadow2)}
 
 <dialog id="resetDialog" aria-labelledby="resetDialogTitle">
   <h2 id="resetDialogTitle">Reset all workshop notes?</h2>
-  <p>This permanently clears every phase's context, scratchpad, and consensus notes stored in this browser. This cannot be undone.</p>
+  <p>This permanently clears all V2 metadata, context, scratchpad, discussion, strategy decisions, and implementation priorities stored in this browser. This cannot be undone.</p>
   <form method="dialog">
     <button class="btn secondary" value="cancel" type="submit">Cancel</button>
     <button class="btn danger" value="confirm" type="submit">Reset all notes</button>
@@ -262,323 +264,8 @@ body.focus-mode .workspace{box-shadow:var(--shadow2)}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="assets/state.js"></script>
-<script>
-'use strict';
-var phases=[['Summary','Executive Summary','The Stress-Test Interview','Stress-test the agency problem AI should help solve before writing the strategic rationale.','What is the single biggest problem our agency hopes AI will solve this year?','Problem statement','Example: Reduce staff time spent summarizing high-volume public comments while preserving accuracy and public trust.',function(c){return 'We are a state agency considering adopting AI to solve this problem: "'+c+'". Act as a cynical technology auditor. Ask us 3 hard, critical questions about potential public backlash, hidden operational costs, or mission creep that we have not thought of yet.'},[['Q','Hard Questions','Read the AI questions aloud before answering them.'],['M','Mission Lens','Tie every answer back to public value.'],['B','Boundary','Name at least one thing AI will not do.']],['Public value','Mission fit','Clear boundaries']],
-['Principles','Guiding Principles for Responsible AI Use','The Ethical Dilemma Simulator','Use a fictional dilemma to turn values into practical boundary rules.','Which top 3 principles should guide staff judgment when rules are not enough?','Top 3 principles','Example: Equity, transparency, accountability.',function(c){return 'We want our core AI principles to be "'+c+'". Create a brief, fictional ethical dilemma or worst-case scenario specific to a state government setting where these principles would conflict or be tested. How should our staff navigate it?'},[['V','Values','Choose principles the agency can operationalize.'],['S','Scenario','Ask whether the dilemma feels realistic.'],['R','Rule','Translate values into rules of thumb.']],['Decision rules','Conflict handling','Employee judgment']],
-['Governance','Governance and Oversight','The Bottleneck Finder','Separate fast-track review from escalation so governance can handle real demand.','Who currently reviews new software or digital tools in our agency, and how long does it take?','Current review structure','Example: Program manager, IT security, data governance, privacy officer, IT governance committee.',function(c){return 'Here is our current agency software review structure: "'+c+'". If 15 different program managers suddenly submit requests for different AI tools next week, where will our bottleneck be? Propose an operational vs. strategic layer to handle this surge smoothly.'},[['F','Fast Lane','Define low-risk reviews that should move quickly.'],['E','Escalation','Name triggers for executive review.'],['O','Owner','Assign accountability for every use case.']],['Operational layer','Strategic layer','Escalation path']],
-['Intake','Use Case Intake and Evaluation Process','The Borderline Case','Use a gray-area scenario to decide what the AI Use Form must ask.','What is a plausible gray-area AI use case for the agency?','Gray-area use case','Example: Drafting initial responses to public records requests.',function(c){return 'Evaluate this specific public sector use case: "'+c+'". Based on standard government risk frameworks, list the top 2 low-risk elements and the top 2 high-risk elements. What specific safeguard must be on the intake form for this?'},[['L','Low Risk','Identify what makes the use manageable.'],['H','High Risk','Identify what could harm people or trust.'],['I','Intake','Turn the safeguard into a required question.']],['Required intake question','Risk rating','Safeguard']],
-['Data','Data Management and Classification','The Data Leak Audit','Trace what could happen if sensitive data enters an unmanaged AI tool.','What is the single most sensitive dataset our agency handles?','Sensitive dataset','Example: Constituent case records, benefits eligibility records, personnel files, investigation notes.',function(c){return 'We handle "'+c+'". If a well-meaning employee pastes a subset of this data into a standard commercial AI tool to summarize a trend, trace the exact path of where that data goes and what compliance or privacy laws may be triggered.'},[['D','Data Path','Follow the data from employee action to vendor systems.'],['C','Classification','Decide what data may never enter public tools.'],['S','Steward','Name who can approve exceptions.']],['Classification boundary','Data steward','No-go data']],
-['Tools','Tool Adoption','The Shadow IT Map','Use realistic employee behavior to decide approved highways and prohibited tools.','What AI tools are staff likely already using on personal devices or free websites?','Likely shadow tools or behaviors','Example: Free chatbots for summarizing emails, browser extensions, image generators, meeting-note apps.',function(c){return 'Act as a state employee who is overwhelmed with administrative paperwork. Given these likely shadow AI behaviors or tools: "'+c+'", list 3 specific ways employees may be using free, unmanaged AI tools today without IT knowledge. What enterprise-approved alternative should we provide to intercept this safely?'},[['A','Approved Highway','Offer a safer path people will actually use.'],['P','Prohibited','Make risky behavior clear and memorable.'],['N','Nudge','Reduce shadow IT by meeting real workflow needs.']],['Approved tools','Prohibited uses','Employee need']],
-['Training','Training and Employee Engagement Strategy','The Fear and Hype Barometer','Shape training around the actual emotion in the workforce.','What is the dominant staff feeling right now: fear, hype, confusion, or fatigue?','Staff sentiment','Example: Confusion about what is allowed, plus hype among early adopters.',function(c){return 'Our agency staff is currently experiencing this AI sentiment: "'+c+'". Suggest a 3-part training framework that addresses this emotional barrier while teaching practical limitations, safe data handling, and escalation paths.'},[['E','Emotion','Start where staff actually are.'],['T','Training','Make it role-specific and practical.'],['C','Capacity','Fit the roadmap to learning resources.']],['Role-specific training','Safe data handling','Escalation path']],
-['HITL','Human Oversight and Accountability','The Hallucination Drill','Practice catching a realistic AI error before defining oversight standards.','What critical task should AI never do autonomously in our agency?','Core function or policy area','Example: Determining eligibility, issuing enforcement decisions, publishing official public guidance.',function(c){return 'Generate a highly realistic-looking but subtly flawed or incorrect paragraph of text that an AI might produce regarding "'+c+'". Now, write a 2-step verification protocol a human employee must follow to spot this exact type of error.'},[['D','Drill','Have the group spot the flaw before reading the answer.'],['V','Verify','Require source checks and accountable review.'],['S','Signoff','Define who signs before action.']],['Verification protocol','Signoff owner','No autonomous action']],
-['Trust','Transparency and Public Trust','The Headline Test','Use the headline you want to avoid to shape plain-language disclosure.','Imagine a local newspaper finds out our agency uses AI. What headline do we want to avoid?','AI use case or headline risk','Example: Agency secretly uses AI to draft public-facing guidance without review.',function(c){return 'We are using AI to assist with this use case or headline risk: "'+c+'". Write two versions of a public disclosure notice for our website. Version A: dense legalese that breeds suspicion. Version B: plain, trustworthy public sector language. Explain why Version B builds better trust.'},[['H','Headline','Name the trust failure before writing disclosure.'],['P','Plain Language','Prefer direct, human wording.'],['F','Feedback','Tell people where to ask questions.']],['Disclosure trigger','Plain language','Feedback channel']],
-['Metrics','Success Metrics and Evaluation','The Unintended Consequences Review','Balance efficiency metrics with compliance, quality, and trust indicators.','If we measure success only by time saved, what bad behavior might we encourage?','Efficiency-only risk','Example: Staff may skip review, over-automate sensitive work, or optimize speed over fairness.',function(c){return 'If a state agency evaluates its AI strategy solely on efficiency and speed, what risks are they ignoring? Use this concern as context: "'+c+'". Suggest 2 risk-monitoring or compliance-auditing metrics we should track alongside efficiency to keep the strategy balanced.'},[['S','Speed','Keep useful efficiency metrics.'],['R','Risk','Add monitoring and audit metrics.'],['L','Learning','Commit to regular strategy review.']],['Efficiency metric','Risk metric','Review cadence']]
-].map(function(p,i){return {id:i+1,short:p[0],title:p[1],exercise:p[2],copy:p[3],discussion:p[4],label:p[5],placeholder:p[6],prompt:p[7],media:p[8],chips:p[9]}});
-
-var STORAGE_KEY='ai-strategy-socratic-sandbox-v2:'+location.pathname;
-var APP_NAME='AI Strategy Socratic Sandbox';
-var current=1,timerSeconds=480,timerHandle=null,storageOk=true;
-
-function $(id){return document.getElementById(id)}
-var els={};
-['phaseTabs','phasePanel','phaseKicker','phaseTitle','phaseCopy','phasePill','phaseProgressLabel','saveStatus','progressBar','sideProgressBar','timerBtn','timerReadout','huddleHint','discussionQuestion','contextLabelText','contextInput','contextHint','mediaGrid','promptText','notesInput','consensusInput','starterChips','progressText','draftScroll','toast','resetDialog','copyPromptBtn','copyDraftBtn','exportWordBtn','exportTopBtn','nextBtn','nextTopBtn','prevBtn','prevTopBtn','focusBtn','resetBtn'].forEach(function(id){els[id]=$(id)});
-
-var reducedMotion=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)');
-
-function esc(v){return String(v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
-function setText(el,txt){if(el.textContent!==txt)el.textContent=txt}
-function phase(){return phases.find(function(p){return p.id===current})}
-
-function defaults(){return SandboxState.defaults()}
-var loaded=SandboxState.load({getItem:function(key){return localStorage.getItem(key)}},STORAGE_KEY);
-var state=loaded.state;
-var storageBlocked=!!loaded.error;
-if(storageBlocked){storageOk=false;setText(els.saveStatus,'Saved workspace could not be loaded. Reset to start fresh; existing storage has not been overwritten.')}
-function save(){
-  if(storageBlocked){renderDraft();return}
-  try{
-    localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
-    flashSave();
-  }catch(e){
-    if(storageOk){storageOk=false;setText(els.saveStatus,'Autosave unavailable — copy or export your draft before closing')}
-  }
-  renderDraft();
-}
-function flashSave(){
-  if(!storageOk)return;
-  setText(els.saveStatus,'Saving…');
-  clearTimeout(flashSave.t);
-  flashSave.t=setTimeout(function(){setText(els.saveStatus,'Autosaved')},1200);
-}
-
-/* --- Tabs (APG tabs pattern: roving tabindex, arrow keys, selection follows focus) --- */
-function buildTabs(){
-  els.phaseTabs.innerHTML=phases.map(function(p){
-    return '<button class="phase-tab" type="button" role="tab" id="tab-'+p.id+'" data-phase="'+p.id+'" aria-controls="phasePanel" aria-selected="false" tabindex="-1"><strong aria-hidden="true">'+p.id+'</strong><span aria-hidden="true">'+esc(p.short)+'</span></button>';
-  }).join('');
-  els.phaseTabs.querySelectorAll('[role=tab]').forEach(function(b){
-    b.addEventListener('click',function(){setPhase(+b.dataset.phase)});
-  });
-  els.phaseTabs.addEventListener('keydown',function(e){
-    var idx=current-1,n=phases.length;
-    if(e.key==='ArrowRight')idx=(idx+1)%n;
-    else if(e.key==='ArrowLeft')idx=(idx-1+n)%n;
-    else if(e.key==='Home')idx=0;
-    else if(e.key==='End')idx=n-1;
-    else return;
-    e.preventDefault();
-    setPhase(idx+1,{focusTab:true});
-  });
-}
-function updateTabs(){
-  els.phaseTabs.querySelectorAll('[role=tab]').forEach(function(t){
-    var id=+t.dataset.phase,selected=id===current,captured=!!state.phases[id].consensus.trim();
-    t.setAttribute('aria-selected',selected?'true':'false');
-    t.tabIndex=selected?0:-1;
-    t.dataset.captured=captured;
-    var p=phases[id-1];
-    t.setAttribute('aria-label','Phase '+p.id+': '+p.short+(captured?', captured':', not captured'));
-  });
-}
-
-function render(){
-  var p=phase(),s=state.phases[current];
-  updateTabs();
-  els.phasePanel.setAttribute('aria-labelledby','tab-'+p.id);
-  document.title='Phase '+p.id+': '+p.title+' — '+APP_NAME;
-  setText(els.phaseKicker,'Phase '+p.id+' / '+p.exercise);
-  setText(els.phaseTitle,p.title);
-  setText(els.phaseCopy,p.copy);
-  setText(els.phasePill,s.consensus.trim()?'Captured':'Not captured');
-  setText(els.huddleHint,'Exercise: '+p.exercise);
-  setText(els.discussionQuestion,p.discussion);
-  setText(els.contextLabelText,p.label);
-  setText(els.contextHint,p.placeholder);
-  els.contextInput.value=s.context;
-  els.promptText.textContent=p.prompt(s.context.trim()||'[Insert '+p.label+']');
-  els.consensusInput.value=s.consensus;
-  els.notesInput.value=s.notes||'';
-  els.mediaGrid.innerHTML=p.media.map(function(x){
-    return '<li class="media"><b><span class="icon" aria-hidden="true">'+esc(x[0])+'</span>'+esc(x[1])+'</b><span>'+esc(x[2])+'</span></li>';
-  }).join('');
-  els.starterChips.innerHTML=p.chips.map(function(c){
-    return '<button class="chip" type="button" data-chip="'+esc(c)+'">'+esc(c)+'</button>';
-  }).join('');
-  els.starterChips.querySelectorAll('[data-chip]').forEach(function(b){
-    b.addEventListener('click',function(){addChip(b.dataset.chip)});
-  });
-  renderDraft();
-}
-
-function renderDraft(){
-  var captured=phases.filter(function(p){return state.phases[p.id].consensus.trim()}).length;
-  var pct=Math.round(captured/phases.length*100);
-  setText(els.progressText,captured+' of '+phases.length+' sections captured.');
-  setText(els.phaseProgressLabel,'Workshop progress: '+captured+' of '+phases.length+' captured');
-  els.progressBar.style.width=pct+'%';
-  els.sideProgressBar.style.width=pct+'%';
-  els.draftScroll.innerHTML=phases.map(function(p){
-    var isCurrent=p.id===current;
-    return '<article class="draft-section'+(isCurrent?' current':'')+'"'+(isCurrent?' aria-current="true"':'')+'><h3>'+p.id+'. '+esc(p.title)+(isCurrent?'<span class="vh"> (current phase)</span>':'')+'</h3><p>'+esc(state.phases[p.id].consensus.trim()||'Awaiting group consensus.')+'</p></article>';
-  }).join('');
-  updateTabs();
-}
-
-function addChip(c){
-  var b=els.consensusInput,pfx=b.value.trim()?b.value.trim()+'\n':'';
-  b.value=pfx+c+': ';
-  state.phases[current].consensus=b.value;
-  b.focus();
-  save();
-}
-
-function setPhase(id,opts){
-  opts=opts||{};
-  current=Math.min(phases.length,Math.max(1,id));
-  stopTimer(false);
-  timerSeconds=480;
-  updateTimerReadout();
-  render();
-  window.scrollTo({top:0,behavior:reducedMotion&&reducedMotion.matches?'auto':'smooth'});
-  if(opts.focusTab){$('tab-'+current).focus()}
-  else if(opts.focusHeading){els.phaseTitle.focus()}
-}
-function nextPhase(){setPhase(current===phases.length?1:current+1,{focusHeading:true})}
-function prevPhase(){setPhase(current===1?phases.length:current-1,{focusHeading:true})}
-
-/* --- Timer --- */
-function fmt(s){return ('0'+Math.floor(s/60)).slice(-2)+':'+('0'+s%60).slice(-2)}
-function updateTimerReadout(){
-  setText(els.timerReadout,fmt(timerSeconds));
-  els.timerReadout.setAttribute('aria-label','Time remaining '+fmt(timerSeconds));
-  setText(els.timerBtn,timerHandle?'Pause timer':'Start '+fmt(timerSeconds)+' timer');
-}
-function toggleTimer(){
-  if(timerHandle){stopTimer(true);return}
-  timerHandle=setInterval(function(){
-    timerSeconds=Math.max(0,timerSeconds-1);
-    updateTimerReadout();
-    if(!timerSeconds){stopTimer(false);showToast('Time is up — capture the group consensus')}
-  },1000);
-  updateTimerReadout();
-  showToast('Timer started: '+fmt(timerSeconds)+' remaining');
-}
-function stopTimer(announce){
-  if(timerHandle){clearInterval(timerHandle);timerHandle=null}
-  updateTimerReadout();
-  if(announce)showToast('Timer paused at '+fmt(timerSeconds));
-}
-
-/* --- Export / clipboard --- */
-function plainText(){
-  return ['Agency AI Adoption Strategy Workshop Capture','','Drafted from Socratic Sandbox consensus notes.','']
-    .concat(phases.reduce(function(a,p){
-      return a.concat([p.id+'. '+p.title,'',state.phases[p.id].consensus.trim()||'Awaiting group consensus.','']);
-    },[])).join('\n');
-}
-function draftHtml(){
-  var body=phases.map(function(p){
-    var c=state.phases[p.id].consensus.trim();
-    return '<h2>'+p.id+'. '+esc(p.title)+'</h2><p>'+(c?esc(c).replace(/\n/g,'<br>'):'<em>Awaiting group consensus.</em>')+'</p>';
-  }).join('');
-  return '<h1>Agency AI Adoption Strategy Workshop Capture</h1><p><em>Drafted from Socratic Sandbox consensus notes.</em></p>'+body;
-}
-function wordDocument(){
-  return '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'
-    +'<head><meta charset="utf-8"><title>Agency AI Adoption Strategy Workshop Capture</title>'
-    +'<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->'
-    +'<style>'
-    +'body{font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#182330}'
-    +'h1{font-size:20pt;color:#102b48}'
-    +'h2{font-size:14pt;color:#17375f;margin-top:18pt}'
-    +'p{line-height:1.4}'
-    +'</style></head><body>'+draftHtml()+'</body></html>';
-}
-function exportWord(){
-  try{
-    var blob=new Blob([wordDocument()],{type:'application/msword'});
-    var url=URL.createObjectURL(blob);
-    var a=document.createElement('a');
-    a.href=url;
-    a.download='agency-ai-strategy-workshop-capture.doc';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(function(){URL.revokeObjectURL(url)},2000);
-    showToast('Draft exported as Word document');
-  }catch(e){
-    showToast('Download blocked here — use Copy Draft instead');
-  }
-}
-function legacyCopy(text){
-  var ta=document.createElement('textarea');
-  ta.value=text;
-  ta.setAttribute('readonly','');
-  ta.style.position='fixed';
-  ta.style.opacity='0';
-  document.body.appendChild(ta);
-  ta.select();
-  var ok=false;
-  try{ok=document.execCommand('copy')}catch(e){}
-  ta.remove();
-  return ok;
-}
-function copyText(text,btn,label){
-  function done(ok){
-    if(ok){
-      setText(btn,'Copied');
-      showToast('Copied to clipboard');
-      setTimeout(function(){setText(btn,label)},1100);
-    }else{
-      showToast('Copy blocked — select the text and copy manually');
-    }
-  }
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text).then(function(){done(true)},function(){done(legacyCopy(text))});
-  }else{
-    done(legacyCopy(text));
-  }
-}
-function copyRichText(html,text,btn,label){
-  function fallback(){copyText(text,btn,label)}
-  if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){
-    var item;
-    try{
-      item=new ClipboardItem({
-        'text/html':new Blob([html],{type:'text/html'}),
-        'text/plain':new Blob([text],{type:'text/plain'})
-      });
-    }catch(e){fallback();return}
-    navigator.clipboard.write([item]).then(function(){
-      setText(btn,'Copied');
-      showToast('Copied formatted draft to clipboard');
-      setTimeout(function(){setText(btn,label)},1100);
-    },fallback);
-  }else{
-    fallback();
-  }
-}
-
-function showToast(m){
-  setText(els.toast,m);
-  els.toast.classList.add('show');
-  clearTimeout(showToast.t);
-  showToast.t=setTimeout(function(){els.toast.classList.remove('show')},2400);
-}
-
-/* --- Reset --- */
-function doReset(){
-  try{localStorage.removeItem(STORAGE_KEY);storageBlocked=false;storageOk=true;setText(els.saveStatus,'Workspace cleared')}catch(e){showToast('Browser storage could not be cleared. Reset was not completed.');return}
-  state=defaults();
-  current=1;
-  timerSeconds=480;
-  stopTimer(false);
-  render();
-  showToast('All workshop notes cleared');
-}
-els.resetBtn.addEventListener('click',function(){
-  if(typeof els.resetDialog.showModal==='function'){
-    els.resetDialog.returnValue='';
-    els.resetDialog.showModal();
-  }else if(window.confirm('Reset all workshop notes?')){
-    doReset();
-  }
-});
-els.resetDialog.addEventListener('close',function(){
-  if(els.resetDialog.returnValue==='confirm')doReset();
-});
-
-/* --- Wiring --- */
-els.contextInput.addEventListener('input',function(e){
-  state.phases[current].context=e.target.value;
-  els.promptText.textContent=phase().prompt(e.target.value.trim()||'[Insert '+phase().label+']');
-  save();
-});
-els.notesInput.addEventListener('input',function(e){state.phases[current].notes=e.target.value;save()});
-els.consensusInput.addEventListener('input',function(e){
-  state.phases[current].consensus=e.target.value;
-  setText(els.phasePill,e.target.value.trim()?'Captured':'Not captured');
-  save();
-});
-els.copyPromptBtn.addEventListener('click',function(e){copyText(els.promptText.textContent,e.currentTarget,'Copy Prompt')});
-els.copyDraftBtn.addEventListener('click',function(e){copyRichText(draftHtml(),plainText(),e.currentTarget,'Copy Draft')});
-els.exportWordBtn.addEventListener('click',exportWord);
-els.exportTopBtn.addEventListener('click',exportWord);
-els.nextBtn.addEventListener('click',nextPhase);
-els.nextTopBtn.addEventListener('click',nextPhase);
-els.prevBtn.addEventListener('click',prevPhase);
-els.prevTopBtn.addEventListener('click',prevPhase);
-els.timerBtn.addEventListener('click',toggleTimer);
-els.focusBtn.addEventListener('click',function(e){
-  var on=document.body.classList.toggle('focus-mode');
-  setText(e.currentTarget,on?'Show Draft':'Focus Mode');
-  showToast(on?'Draft panel hidden':'Draft panel shown');
-});
-
-buildTabs();
-updateTimerReadout();
-render();
-</script>
+<script src="assets/phases.js"></script>
+<script src="assets/strategy-content.js"></script>
+<script src="assets/app.js"></script>
 </body>
 </html>
