@@ -17,7 +17,8 @@ concurrency:
 
 jobs:
   deploy:
-    if: github.ref == 'refs/heads/main'
+    # V2 can be published deliberately before merge; branch pushes never deploy it.
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/v2-strategy-redesign')
     runs-on: ubuntu-latest
     environment:
       name: github-pages

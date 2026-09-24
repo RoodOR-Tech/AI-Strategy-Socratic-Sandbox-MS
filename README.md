@@ -1,12 +1,14 @@
 # AI Strategy Socratic Sandbox V2
 
+**[Open the live V2 workshop on GitHub Pages](https://roodor-tech.github.io/AI-Strategy-Socratic-Sandbox-MS/)**
+
 A browser-only, facilitated workshop for developing a public-sector AI Adoption Strategy:
 
 **Huddle → interrogate an approved AI tool → debate → decide → capture → export.**
 
 AI is a Socratic challenger. People own the judgments, priorities, accountability and final language. The app has no embedded chatbot, accounts, backend, database, API, telemetry, or content transmission.
 
-V1 remains on `main` and tag `v1.0` at `4782ba0` while V2 is reviewed on `v2-strategy-redesign`. Nothing in this work merges or deploys V2 over the stable site. [V2-SPEC.md](V2-SPEC.md) is the implementation source of truth; [QA.md](QA.md) records verification and remaining manual checks.
+V1 remains on `main` and tag `v1.0` at `4782ba0` while V2 is reviewed on `v2-strategy-redesign`. V2 is published to GitHub Pages through an explicitly requested manual deployment; the review branch has not been merged into `main`. [V2-SPEC.md](V2-SPEC.md) is the implementation source of truth; [QA.md](QA.md) records verification and remaining manual checks.
 
 ## Use the workshop
 
@@ -61,7 +63,7 @@ templates/
 
 This is a deliberate V1 packaging change: **V2 is a static folder, not a single self-contained file.** An `.aspx` entry point alone is insufficient. After changing HTML, regenerate the identical copy with `cp index.html ai-strategy-socratic-sandbox.aspx` (PowerShell: `Copy-Item index.html ai-strategy-socratic-sandbox.aspx`). `npm run check` checks parity.
 
-GitHub Pages uses `.github/workflows/deploy-pages.yml`. It stages both entry points and their local assets. Deployment is restricted to `main`, including manual runs; feature-branch tests do not publish V2. The existing stable site is [GitHub Pages](https://roodor-tech.github.io/AI-Strategy-Socratic-Sandbox-MS/).
+GitHub Pages uses `.github/workflows/deploy-pages.yml`. It stages both entry points and their local assets. The live V2 URL is **[https://roodor-tech.github.io/AI-Strategy-Socratic-Sandbox-MS/](https://roodor-tech.github.io/AI-Strategy-Socratic-Sandbox-MS/)**. Pushes to `main` deploy automatically. Before merge, V2 can be published explicitly using **Actions → Deploy to GitHub Pages → Run workflow → v2-strategy-redesign**. Feature-branch pushes and tests do not deploy automatically. A subsequent deployment from `main` would publish that branch's version, so select the intended release branch deliberately.
 
 For a SharePoint library, upload the entry point and both asset folders with the same hierarchy. SharePoint's existing custom-script restrictions still apply. SharePoint Online may block `.aspx` script execution under `DenyAddAndCustomizePages`; use an approved host or have the administrator assess its configuration. A real SharePoint tenant deployment has not been verified here. Downloading the complete static folder and opening `index.html` locally is supported and tested.
 
