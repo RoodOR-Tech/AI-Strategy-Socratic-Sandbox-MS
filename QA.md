@@ -6,6 +6,8 @@ V1 baseline `4782ba0` was tested before implementation: Chrome load, context/scr
 
 V2 uses pinned development-only Playwright 1.58.2 and axe-core 4.10.3. `npm run check`, `npm test`, `npm run test:browser` and `python tests/verify_docx.py` are repeatable locally and in the new PR CI workflow. No previous regression CI existed; the previous Pages workflow was reviewed and updated to stage local assets while preventing feature-branch deployment.
 
+Remote CI on implementation commit `558dfd6`: [push run](https://github.com/RoodOR-Tech/AI-Strategy-Socratic-Sandbox-MS/actions/runs/36044844537) and [PR run](https://github.com/RoodOR-Tech/AI-Strategy-Socratic-Sandbox-MS/actions/runs/36044938063) passed npm checks, unit tests, Linux Chromium/axe regression, OOXML verification and artifact upload. [PR #5](https://github.com/RoodOR-Tech/AI-Strategy-Socratic-Sandbox-MS/pull/5) is open for review; no merge or deployment was performed.
+
 ## Checks completed locally
 
 - Eight Node unit tests: state schema/default independence, Unicode round trip, unsafe/incorrect data types, corrupt/blocked storage, approved-only output, bullet parsing, ten prompt guardrails, roadmap approval, safe filenames and XML character handling.
