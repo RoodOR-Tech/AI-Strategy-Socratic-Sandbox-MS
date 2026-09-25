@@ -1,6 +1,6 @@
 'use strict';
 var STORAGE_KEY='ai-strategy-socratic-sandbox-v1-refresh:'+location.pathname;
-var APP_NAME='AI Strategy Socratic Sandbox';
+var APP_NAME='AI Strategy Development Facilitation App';
 var current=1,timerSeconds=480,timerHandle=null,storageOk=true;
 
 function $(id){return document.getElementById(id)}

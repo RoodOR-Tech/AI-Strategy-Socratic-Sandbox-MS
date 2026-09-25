@@ -16,7 +16,7 @@
     if(model.metadata.agency.trim())content.push(para(model.metadata.agency,{spacing:{before:960,after:240},run:{size:28}}));
     content.push(heading(title,d.HeadingLevel.TITLE,{spacing:{before:240,after:360}}));
     Object.keys(t.identificationLabels).forEach(function(k){if(model.metadata[k].trim())content.push(para(t.identificationLabels[k]+': '+model.metadata[k]))});
-    content.push(para('Generated '+date+' · Socratic Sandbox '+t.version,{spacing:{before:360,after:120},run:{size:18,color:'525B62'}}));
+    content.push(para('Generated '+date+' · AI Strategy Development Facilitation App '+t.version,{spacing:{before:360,after:120},run:{size:18,color:'525B62'}}));
     model.sections.forEach(function(s,i){
       content.push(heading(s.id+'. '+s.title,d.HeadingLevel.HEADING_1,{pageBreakBefore:i===0,keepNext:s.fields.length>0}));
       s.fields.forEach(function(f){if(f.label)content.push(heading(f.label,d.HeadingLevel.HEADING_2));content.push.apply(content,blocks(f.blocks))});
