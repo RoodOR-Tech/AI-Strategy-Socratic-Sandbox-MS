@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-      # Feature-branch trigger so the site goes live before merge; remove after merging.
-      - claude/sharepoint-app-refactor-d5sios
   workflow_dispatch:
 
 permissions:
@@ -19,6 +17,8 @@ concurrency:
 
 jobs:
   deploy:
+    # The review branch can be published deliberately; branch pushes never deploy it.
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/v2-strategy-redesign')
     runs-on: ubuntu-latest
     environment:
       name: github-pages

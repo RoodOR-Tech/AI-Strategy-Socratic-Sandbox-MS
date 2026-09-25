@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<link rel="icon" href="@@LOGO@@">
+<title>AI Strategy Development Facilitation App</title>
+<!-- INLINE_STYLE -->
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<div class="shell">
+<header>
+  <div>
+    <div class="brand-row">
+      <img class="brand-logo" src="@@LOGO@@" alt="Oregon Enterprise Information Services">
+      <h1>AI Strategy Development Facilitation App</h1>
+    </div>
+    <p class="tagline">Huddle. Challenge. Decide. Use your own approved AI tool, then capture the group’s strategy.</p>
+  </div>
+  <div class="top-actions">
+    <button class="btn ghost" id="prevTopBtn" type="button">Previous phase</button>
+    <button class="btn ghost" id="nextTopBtn" type="button">Next phase</button>
+    <button class="btn secondary" id="focusBtn" type="button" aria-pressed="false">Focus Mode</button>
+    <button class="btn secondary" id="resetBtn" type="button">Reset</button>
+    <button class="btn" id="exportTopBtn" type="button">Export DOCX</button>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+<noscript>
+  <div class="noscript-warning">
+    <strong>This workshop page needs JavaScript to run.</strong>
+    <p>Your browser or this SharePoint site is blocking scripts. If you opened this file from a SharePoint document library and see this message, ask your site administrator to enable custom script for the site, or host the page on an approved static-hosting service instead.</p>
+  </div>
+</noscript>
+
+<section class="workspace" aria-label="Socratic workspace">
+  <div class="phase-tabs" id="phaseTabs" role="tablist" aria-label="Workshop phases"></div>
+  <div class="phase" id="phasePanel" role="tabpanel" aria-labelledby="tab-1">
+    <div class="phase-head">
+      <div>
+        <p class="kicker" id="phaseKicker"></p>
+        <h2 id="phaseTitle" tabindex="-1"></h2>
+        <p class="copy" id="phaseCopy"></p>
+      </div>
+      <span class="pill" id="phasePill" aria-live="polite">Not captured</span>
+    </div>
+    <div class="phase-tools">
+      <div class="progress-wrap">
+        <div class="progress-top">
+          <span id="phaseProgressLabel">Workshop progress</span>
+          <span id="saveStatus" aria-live="polite">Autosaved</span>
+        </div>
+        <div class="progress-track" aria-hidden="true"><div class="progress-bar" id="progressBar"></div></div>
+      </div>
+      <div class="timer">
+        <button class="btn ghost" id="prevBtn" type="button">Previous</button>
+        <button class="btn secondary" id="timerBtn" type="button">Start 8:00 timer</button>
+        <span class="timer-readout" id="timerReadout" role="timer" aria-label="Time remaining">08:00</span>
+        <button class="btn ghost" id="nextBtn" type="button">Next</button>
+      </div>
+    </div>
+    <ul class="facilitator-strip">
+      <li class="mini-stat"><b>Huddle</b><span class="small">Add local context before copying the prompt.</span></li>
+      <li class="mini-stat"><b>Interrogate</b><span class="small">Use your approved AI tool and bring back the useful friction.</span></li>
+      <li class="mini-stat"><b>Consensus</b><span class="small">Only the final group decision enters the draft.</span></li>
+    </ul>
+    <div class="grid">
+      <div class="card">
+        <div class="card-head"><h3>Step 1: Group Huddle</h3><span class="small" id="huddleHint"></span></div>
+        <div class="card-body">
+          <div class="discussion" id="discussionQuestion"></div>
+          <label for="contextInput"><span id="contextLabelText">Local context</span></label>
+          <textarea id="contextInput" aria-describedby="contextHint"></textarea>
+          <p class="small" id="contextHint"></p>
+          <ul class="media-grid" id="mediaGrid"></ul>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>Step 2: Ask Your AI</h3><button class="btn secondary" id="copyPromptBtn" type="button">Copy Prompt</button></div>
+        <div class="card-body">
+          <div class="prompt" id="promptText"></div>
+          <p class="small">Paste this prompt into your enterprise-approved AI tool. Bring the AI response back to the group for debate.</p>
+          <label for="notesInput">AI response scratchpad</label>
+          <textarea class="ai-notes" id="notesInput" aria-describedby="notesHint"></textarea>
+          <p class="small" id="notesHint">Optional: paste useful AI questions, risks, or phrases here. This will not export unless you move it into consensus.</p>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Step 3: Consensus Capture</h3><span class="small">This text feeds the final draft</span></div>
+      <div class="card-body">
+        <label for="consensusInput">What did the group decide after discussing the AI response?</label>
+        <textarea id="consensusInput" aria-describedby="consensusHint"></textarea>
+        <p class="small" id="consensusHint">Only the group’s decisions in this field enter the report. Start a line with “- ” for a bullet.</p>
+        <div class="chips" id="starterChips" role="group" aria-label="Starter phrases — insert into consensus notes"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<aside class="draft" aria-label="Strategy draft">
+  <div class="draft-head">
+    <h2>Strategy Capture</h2>
+    <details class="report-details"><summary>Report details (optional)</summary><div id="reportFields"></div></details>
+    <p id="progressText" aria-live="polite">0 of 10 sections captured.</p>
+    <div class="progress-track" aria-hidden="true"><div class="progress-bar" id="sideProgressBar"></div></div>
+  </div>
+  <div class="draft-scroll" id="draftScroll" role="region" aria-label="Captured draft sections" tabindex="0"></div>
+  <div class="draft-actions">
+    <button class="btn" id="exportWordBtn" type="button">Export DOCX</button>
+    <button class="btn secondary" id="copyDraftBtn" type="button">Copy Draft</button>
+  </div>
+</aside>
+</main>
+
+<footer>
+  Notes stay in this browser on this device. This single file works offline; nothing is sent to an external service. Use Reset before leaving a shared computer.
+</footer>
+</div>
+
+<dialog id="resetDialog" aria-labelledby="resetDialogTitle">
+  <h2 id="resetDialogTitle">Reset all workshop notes?</h2>
+  <p>This clears this refresh workspace’s context, scratchpad, consensus and report details. Original V1 and V2 storage remain separate. This cannot be undone.</p>
+  <form method="dialog">
+    <button class="btn secondary" value="cancel" type="submit">Cancel</button>
+    <button class="btn danger" value="confirm" type="submit">Reset all notes</button>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- INLINE_SCRIPTS -->
+</body>
+</html>

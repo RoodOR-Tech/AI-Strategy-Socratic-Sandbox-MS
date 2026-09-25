@@ -1,102 +1,72 @@
-# AI Strategy Socratic Sandbox
+# AI Strategy Socratic Sandbox — V1 Refresh
 
-A static, single-file workshop app for guiding an agency AI adoption strategy session.
-It runs entirely in the browser, makes **zero network calls**, and stores workshop notes
-only in the browser's local storage on the user's device.
+**[Open the live workshop](https://roodor-tech.github.io/AI-Strategy-Socratic-Sandbox-MS/)**
 
-Two copies of the same app ship in this repo:
+The original guided workshop, refreshed with Oregon EIS branding and genuine Word reports. **One self-contained HTML file** works offline or on a static host. No accounts, backend, APIs, telemetry, or transmission of workshop content.
 
-| File | Purpose |
-|---|---|
-| `index.html` | Canonical source. Served on GitHub Pages and usable on any static web host. |
-| `ai-strategy-socratic-sandbox.aspx` | Byte-identical copy for SharePoint document libraries, which render `.aspx` in the browser but force `.html` files to download or open in a preview pane. |
+**Huddle → ask your approved AI → debate → capture the group's consensus.**
 
-**If you edit `index.html`, regenerate the copy:** `cp index.html ai-strategy-socratic-sandbox.aspx`
+## Use the workshop
 
-## Live app — GitHub Pages
+Open the live link, or [download index.html](https://raw.githubusercontent.com/RoodOR-Tech/AI-Strategy-Socratic-Sandbox-MS/v2-strategy-redesign/index.html) (save the linked file, then double-click it). No other files are needed.
 
-The app is published at:
+1. Start on Phase 1. Discuss the huddle question and enter local context. Guide cards help facilitate each exercise.
+2. Copy the prompt into your enterprise-approved AI tool. Bring useful questions or responses back to the AI scratchpad.
+3. Challenge the response and record the group's decisions in **Consensus Capture**. Starter buttons help begin the language. Only consensus enters the developing strategy and export.
+4. Work through the ten phases using the tabs or Previous/Next. Use the timer and Focus Mode as needed.
+5. Optionally expand **Report details** for agency, title, version and workshop date. Use **Export DOCX** for a real Word report, or **Copy Draft**.
 
-**<https://roodor-tech.github.io/AI-Strategy-Socratic-Sandbox-MS/>**
+There is no setup gate, approval checkbox, structured intake form or extra synthesis phase. AI remains a challenger; humans make the decisions. Context and scratchpad notes never automatically become strategy content.
 
-Deployment is automated by `.github/workflows/deploy-pages.yml`: every push to `main`
-republishes the site (only `index.html` and the `.aspx` copy are deployed). No build step.
+## Word report
 
-If the first workflow run fails with a "Pages site not found / not enabled" error, a repo
-admin needs to enable it once: **Settings → Pages → Build and deployment → Source →
-GitHub Actions**, then re-run the workflow.
+The export has an identification cover, the ten official Oregon AI Adoption Strategy headings, consensus prose, proper bullet lists, generation information and page numbers. Start a line with `- `, `* ` or `• ` to make a bullet. Empty sections retain their headings without placeholder text. The filename is sanitized and length-bounded, such as `Agency-AI-Adoption-Strategy-v1.0.docx`.
 
-> Note: workshop notes are stored in the visitor's own browser (local storage, keyed per
-> page URL). Nothing is ever sent to the server, so the public URL carries no data risk —
-> but notes do not roam between devices or browsers.
+The dedicated [export template](templates/README.md) follows the structure and typography of [Oregon Attachment A](https://www.oregon.gov/eis/Documents/Attachment-A-AI-Adoption-Strategy-Template.docx). Template instructions do not enter the report. Bundled **docx 9.6.1** generates genuine Office Open XML locally; no conversion service is involved. Word may substitute fonts depending on the device.
 
-## Deploy to SharePoint
+## Local storage and privacy
 
-### SharePoint Server Subscription Edition (on-premises)
+Autosave uses `ai-strategy-socratic-sandbox-v1-refresh:` plus the page pathname, schema `1.1`, app version `1.1.0`. Each phase retains V1's context, scratchpad and consensus. Report details are saved alongside them.
 
-1. Upload `ai-strategy-socratic-sandbox.aspx` to any document library (e.g. Site Assets or Documents).
-2. Users click the file and it opens as a full page in the browser. That's it — on-prem
-   SharePoint renders library `.aspx` pages by default. Only client-side script is used;
-   nothing runs on the server.
+On first use, valid V1 data at the same origin/path is copied into the refresh workspace without changing the original. V2 data is left separate. Reset confirms before clearing the refresh workspace and saves an empty workspace to prevent old V1 notes from reappearing. Other paths, browsers and versions are unaffected.
 
-### SharePoint Online (Microsoft 365)
+Browser cleanup, private browsing, storage policies or quota can prevent persistence. Visible status reports failures. Corrupt or unsupported saved data is preserved until explicit Reset. Keep the tab open and copy unsaved working notes if autosave fails; the report contains consensus only. Moving/renaming a downloaded file can change its storage location, and local-file storage behavior varies by browser.
 
-SharePoint Online blocks custom script on most sites by default (`DenyAddAndCustomizePages`).
-With custom script blocked, an uploaded `.aspx` page will not execute its JavaScript and the
-page shows its built-in "JavaScript required" notice instead of the app.
+All fonts, logo, styles, scripts and DOCX support are embedded. There are no runtime asset requests, CDNs or content-network calls. Copying a prompt into an external AI is a deliberate participant action subject to that tool's policies.
 
-Options, in order of preference:
+## Hosting: upload one file
 
-1. **Enable custom script on one dedicated site** (admin action), then upload the `.aspx`
-   to a library on that site:
-   `Set-SPOSite -Identity https://tenant.sharepoint.com/sites/workshops -DenyAddAndCustomizePages $false`
-   Scope this to a single, controlled site — do not enable it tenant-wide.
-2. **Link to the GitHub Pages site** (see above) from SharePoint, or surface it in a
-   modern page with the **Embed** web part (a site admin must add
-   `roodor-tech.github.io` to the site's allowed iframe domains under
-   Site Settings → HTML Field Security).
-3. If neither is possible, users can still download the `.html` file and open it locally —
-   the app is fully self-contained.
+Upload **`index.html` alone** to GitHub Pages or another static host. The byte-identical `ai-strategy-socratic-sandbox.aspx` is an alternative for environments that allow that entry point. Neither needs `assets/` or `templates/` beside it. Each is approximately 2.4 MB because fonts and Word support are embedded.
 
-### Why it is safe for a SharePoint environment
+SharePoint's custom-script restrictions still apply; a tenant may block ASPX execution. A real SharePoint tenant deployment has not been verified. Downloaded HTML works independently, including offline DOCX export.
 
-- No external scripts, styles, fonts, images, or network requests of any kind — the page
-  is one self-contained file, so there is nothing for a CSP or firewall to worry about.
-- No server-side code (`<%` blocks or `runat="server"`) — SharePoint parses the `.aspx`
-  as static markup and everything runs client-side.
-- All dynamic text is HTML-escaped before rendering, and workshop notes never leave the
-  browser. Local storage is keyed by page path, so copies in different libraries keep
-  separate state.
-- Clipboard and file download have graceful fallbacks with clear user messaging for
-  locked-down browsers and embedded webviews; if local storage is unavailable, the app
-  says so and keeps working for the session.
+Pages is published at **[https://roodor-tech.github.io/AI-Strategy-Socratic-Sandbox-MS/](https://roodor-tech.github.io/AI-Strategy-Socratic-Sandbox-MS/)**. Pushes to `main` deploy that branch. This review branch can be published deliberately through **Actions → Deploy to GitHub Pages → Run workflow → v2-strategy-redesign**. Feature-branch pushes do not deploy automatically.
 
-## Accessibility (WCAG 2.1 Level AA)
+## Maintainer source and checks
 
-The app is built to WCAG 2.1 AA per `CLAUDE-accessibility-directive.md`:
+Readable source remains modular in the repository; distribution is a single file. After source edits, run `npm run package` to regenerate both checked-in entry points. This small packaging step only embeds assets; users and hosting need no Node installation or build system.
 
-- Semantic landmarks (`header`, `main`, `aside`, `footer`), a skip-to-content link, and a
-  logical heading hierarchy.
-- The phase switcher implements the ARIA APG **tabs** pattern: roving tabindex,
-  Left/Right/Home/End arrow navigation, `aria-selected`, and a labelled tab panel.
-  Captured/not-captured state is in each tab's accessible name, not conveyed by the
-  green dot alone.
-- Focus management: Previous/Next moves focus to the new phase heading and
-  `document.title` updates on every phase change. The reset confirmation is a native
-  `<dialog>` (focus trap, Escape, focus return for free).
-- Live regions announce autosave status, capture progress, phase capture state, and all
-  toast messages (copy/export/timer/reset). The countdown uses `role="timer"` and does
-  **not** announce every second.
-- Visible `:focus-visible` indicators on all interactive elements; text and UI contrast
-  verified ≥ 4.5:1 / 3:1; no fixed text heights; reflows without horizontal scroll at
-  320 px; non-essential motion disabled under `prefers-reduced-motion: reduce`.
+| Source | Purpose |
+| --- | --- |
+| `src/index.template.html` | Original V1 interface with embedding markers |
+| `assets/app.js`, `assets/phases.js` | V1 interactions and ten guided Socratic exercises |
+| `assets/workshop-state.js` | Refresh state, validation and safe V1 copying |
+| `assets/report-content.js` | Consensus-only preview, clipboard and export model |
+| `assets/styles.css`, `assets/brand/` | Oregon EIS presentation, fonts and logo |
+| `assets/docx-export.js`, `templates/oregon-strategy.js` | Word document generation and styling |
+| `assets/vendor/` | Pinned DOCX library and license notices |
+| `scripts/package-single-file.cjs` | Deterministic one-file packaging |
 
-**Verification:** axe-core (WCAG 2.1 A/AA + best-practice rules) run via Playwright against
-the initial view, the open reset dialog, and a populated later phase — 0 violations — plus
-a scripted keyboard-only pass (skip link, tablist arrows, dialog Escape/focus return, timer,
-chips, focus mode). Automated tools catch only part of WCAG; a manual screen reader pass
-(NVDA/JAWS) is still recommended before certifying compliance.
+```sh
+npm ci
+npm run package
+npx playwright install chromium
+npm run check
+npm test
+npm run test:browser
+python tests/verify_docx.py
+```
 
-**Known limitation:** the export is a plain-text Markdown file, which carries its heading
-structure as text. If a formally tagged accessible document (e.g. tagged PDF) is required
-for distribution, convert the Markdown in Word or another tool that produces tagged output.
+Set `BROWSER_CHANNELS=chrome,msedge` to test installed Chrome and Edge. CI uses Chromium. Playwright and axe are development-only dependencies. Tests include V1 interactions, keyboard navigation, timer, clipboard, migration/reset, responsive layouts, accessibility scans, private-note exclusion, DOCX structure, and a lone HTML file in an empty directory with networking disabled. See [QA.md](QA.md) for results and limits.
+
+The original V1 remains on `main` and tag `v1.0` at `4782ba0`. This refresh is reviewed in [PR #5](https://github.com/RoodOR-Tech/AI-Strategy-Socratic-Sandbox-MS/pull/5) on `v2-strategy-redesign`; it has not been merged. [REFRESH-SPEC.md](REFRESH-SPEC.md) is the current source of truth. The earlier expanded V2 specification is retained as historical context.

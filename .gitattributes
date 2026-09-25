@@ -1,0 +1,9 @@
+* text=auto
+*.js text eol=lf
+*.cjs text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.aspx text eol=lf
+*.png binary
+*.ttf binary
+*.docx binary
